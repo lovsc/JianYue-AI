@@ -1,0 +1,37 @@
+# Secrets and local environment
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependencies and build output
+**/node_modules/
+**/dist/
+**/coverage/
+
+# Runtime data
+backend/database.db
+backend/database.db-*
+*.sqlite
+*.sqlite3
+*.log
+
+# Generated and temporary artifacts
+frontend/tmp/
+frontend/output/
+tmp/
+
+# Local resume artifacts containing personal information
+frontend/scripts/generate_zhang_yu_resume_pdf.py
+
+# Superseded local prototypes (the active page is src/views/Login.vue)
+frontend/src/views/login/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local agent metadata
+.agents/
+.codex/
