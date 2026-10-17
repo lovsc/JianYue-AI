@@ -113,7 +113,7 @@ class Runtime:
         code = ('const Database=require(process.argv[1]);const db=new Database(process.argv[2],{readonly:true});'
                 'db.backup(process.argv[3]).then(()=>db.close()).catch(()=>{db.close();process.exitCode=1});')
         module = self.paths.current / 'backend/node_modules/better-sqlite3'
-        subprocess.run(['runuser', '-u', 'www', '--', str(self.paths.node), '-e', code, str(module), str(self.paths.database), str(temporary)], check=True)
+        subprocess.run(['/usr/sbin/runuser', '-u', 'www', '--', str(self.paths.node), '-e', code, str(module), str(self.paths.database), str(temporary)], check=True)
         try:
             shutil.copy2(str(temporary), str(destination))
             os.chmod(str(destination), 0o600)
@@ -130,7 +130,7 @@ class Runtime:
         shutil.chown(str(cache), user='www', group='www')
         environment['npm_config_cache'] = str(cache)
         npm_cli = self.paths.node.parent.parent / 'lib/node_modules/npm/bin/npm-cli.js'
-        subprocess.run(['runuser', '-u', 'www', '--', str(self.paths.node), str(npm_cli), 'ci', '--omit=dev', '--no-audit', '--no-fund'], cwd=str(release / 'backend'), env=environment, check=True, timeout=600)
+        subprocess.run(['/usr/sbin/runuser', '-u', 'www', '--', str(self.paths.node), str(npm_cli), 'ci', '--omit=dev', '--no-audit', '--no-fund'], cwd=str(release / 'backend'), env=environment, check=True, timeout=600)
         own_tree(release, 'root')
         os.symlink(str(self.paths.environment), str(release / 'backend/.env'))
 
@@ -147,7 +147,7 @@ class Runtime:
         log_path = sandbox / 'startup.log'
         try:
             with log_path.open('w') as log:
-                process = subprocess.Popen(['runuser', '-u', 'www', '--', str(self.paths.node), str(release / 'backend/server.js')], cwd=str(release / 'backend'), env=env, stdout=log, stderr=log, start_new_session=True)
+                process = subprocess.Popen(['/usr/sbin/runuser', '-u', 'www', '--', str(self.paths.node), str(release / 'backend/server.js')], cwd=str(release / 'backend'), env=env, stdout=log, stderr=log, start_new_session=True)
                 try:
                     self.health(commit, 'http://127.0.0.1:' + str(port), attempts=30)
                     if process.poll() is not None:
