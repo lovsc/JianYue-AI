@@ -160,6 +160,16 @@ class TransitionTests(unittest.TestCase):
         self.assertFalse(self.paths.maintenance.exists())
         self.assertEqual(runtime.events[-2:], ['start', 'health'])
 
+    def test_failed_recovery_keeps_writes_blocked(self):
+        runtime = FakeRuntime(self.paths, health_failure=True)
+        def unhealthy(*args, **kwargs):
+            raise RuntimeError('health unavailable')
+        runtime.health = unhealthy
+        with mock.patch.object(deploy.shutil, 'chown'):
+            with self.assertRaises(RuntimeError):
+                deploy.deploy_candidate(self.paths, runtime, self.release, COMMIT, self.paths.backups)
+        self.assertTrue(self.paths.maintenance.exists())
+
 
 if __name__ == '__main__':
     unittest.main()

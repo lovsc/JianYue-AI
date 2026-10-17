@@ -125,7 +125,12 @@ class Runtime:
         own_tree(release, 'www')
         environment = dict(os.environ)
         environment['PATH'] = str(self.paths.node.parent) + ':/usr/local/bin:/usr/bin:/bin'
-        subprocess.run(['runuser', '-u', 'www', '--', str(self.paths.node.parent / 'npm'), 'ci', '--omit=dev', '--no-audit', '--no-fund'], cwd=str(release / 'backend'), env=environment, check=True, timeout=600)
+        cache = self.paths.data / 'npm-cache'
+        cache.mkdir(exist_ok=True, mode=0o700)
+        shutil.chown(str(cache), user='www', group='www')
+        environment['npm_config_cache'] = str(cache)
+        npm_cli = self.paths.node.parent.parent / 'lib/node_modules/npm/bin/npm-cli.js'
+        subprocess.run(['runuser', '-u', 'www', '--', str(self.paths.node), str(npm_cli), 'ci', '--omit=dev', '--no-audit', '--no-fund'], cwd=str(release / 'backend'), env=environment, check=True, timeout=600)
         own_tree(release, 'root')
         os.symlink(str(self.paths.environment), str(release / 'backend/.env'))
 
@@ -185,6 +190,7 @@ def deploy_candidate(paths, runtime, release, commit, backup):
     stopped = False
     switched = False
     snapshot_ready = False
+    writes_safe = False
     try:
         runtime.service('stop')
         stopped = True
@@ -196,6 +202,7 @@ def deploy_candidate(paths, runtime, release, commit, backup):
         runtime.health(commit)
         runtime.health(commit, 'https://octopush5.com', attempts=10)
         (backup / 'deployment.json').write_text(json.dumps({'commit': commit, 'previous': str(previous), 'release': str(release), 'status': 'success'}))
+        writes_safe = True
         print('Deployment passed: ' + commit, flush=True)
     except Exception:
         if switched:
@@ -219,10 +226,11 @@ def deploy_candidate(paths, runtime, release, commit, backup):
         if stopped:
             runtime.service('start')
             runtime.health(None)
+        writes_safe = True
         print('Deployment failed; previous application restored. Review deployment logs.', flush=True)
         raise
     finally:
-        if paths.maintenance.exists():
+        if (writes_safe or not stopped) and paths.maintenance.exists():
             paths.maintenance.unlink()
 
 
