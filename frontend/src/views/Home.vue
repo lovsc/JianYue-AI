@@ -120,6 +120,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { listResumes } from '@/api/resumes'
 import { createSession, deleteSession, getSession, listSessions } from '@/api/chat'
 import { useAuthStore } from '@/stores/auth'
+import { apiBase } from '@/api/http'
 
 const auth = useAuthStore(),
   sessions = ref([]),
@@ -137,7 +138,6 @@ const prompts = [
   '如何量化描述项目成果？',
   '帮我制定前端岗位的学习计划',
 ]
-const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'
 let controller = null
 
 const loadSessions = async () => {

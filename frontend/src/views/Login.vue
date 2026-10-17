@@ -128,6 +128,7 @@
         </div>
       </div>
     </div>
+    <SiteFiling class="login-filing" />
   </div>
 </template>
 
@@ -136,6 +137,7 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import SiteFiling from '@/components/SiteFiling.vue'
 
 // --- 路由实例 ---
 const router = useRouter()
@@ -195,12 +197,9 @@ const handleSubmit = async () => {
   if (!formRef.value) return
 
   // 执行表单全校验
-  await formRef.value.validate((valid, fields) => {
+  await formRef.value.validate((valid) => {
     if (valid) {
-      console.log('校验通过，准备发送请求:', formData)
       handleApiCall()
-    } else {
-      console.log('校验失败:', fields)
     }
   })
 }
@@ -222,12 +221,10 @@ const handleApiCall = async () => {
       ElMessage.success(data.message)
       // 跳转到首页
       router.push('/home')
-      console.log('用户信息：', data.data.user)
     } else {
       ElMessage.error(data.message)
     }
   } catch (error) {
-    console.log(error)
     ElMessage.error(error.response?.data?.message || '请求失败，请检查后端服务')
   } finally {
     loading.value = false
@@ -274,6 +271,8 @@ $purple: #6d4aff;
 $black: #1a1a1a;
 $orange: #ff9d6a;
 $yellow: #f0d949;
+
+.login-filing { position: absolute; left: 0; bottom: 10px; width: 100%; z-index: 20; }
 
 .login-page {
   position: relative;

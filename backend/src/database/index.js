@@ -1,6 +1,7 @@
 const Database = require('better-sqlite3')
 const { env } = require('../config/env')
 
+require('fs').mkdirSync(require('path').dirname(env.databasePath), { recursive: true })
 const db = new Database(env.databasePath)
 db.pragma('journal_mode = WAL')
 db.pragma('foreign_keys = ON')

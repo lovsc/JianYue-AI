@@ -30,6 +30,12 @@ npm run dev
 
 完整的业务、架构、接口和故障排查说明请阅读 [项目开发与交接文档](docs/PROJECT_DEVELOPMENT.md)。
 
+## 服务器部署
+
+阿里云与宝塔部署说明见 [部署文档](docs/DEPLOYMENT_BAOTA.md)。本地执行 `node scripts/package-release.mjs` 可构建不含密钥、用户数据库和本机依赖的发布包，输出到 D 盘项目的 `tmp/releases/`。
+
+后续更新使用 [一键发布流程](docs/ONE_CLICK_DEPLOY.md)：推送代码只运行检查，正式上线由 GitHub Actions 手动触发。
+
 ## 安全提醒
 
 不要提交 `.env`、API Key、JWT Secret、SQLite 数据库或用户生成文件。仓库仅保留 `.env.example` 作为配置模板。

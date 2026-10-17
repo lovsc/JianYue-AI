@@ -19,6 +19,8 @@ backend/database.db-*
 frontend/tmp/
 frontend/output/
 tmp/
+**/__pycache__/
+*.pyc
 
 # Local resume artifacts containing personal information
 frontend/scripts/generate_zhang_yu_resume_pdf.py

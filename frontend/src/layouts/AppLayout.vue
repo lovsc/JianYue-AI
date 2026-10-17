@@ -23,13 +23,14 @@
         <button title="退出登录" @click="logout">退出</button>
       </div>
     </aside>
-    <main class="app-main"><slot /></main>
+    <main class="app-main"><slot /><SiteFiling /></main>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import SiteFiling from '@/components/SiteFiling.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
