@@ -11,8 +11,8 @@ function normalizeCredentials(username, password) {
   if (normalizedUsername.length < 3 || normalizedUsername.length > 20) {
     throw new AppError(400, '用户名长度应为 3 到 20 个字符', 'VALIDATION_ERROR')
   }
-  if (normalizedPassword.length < 6 || normalizedPassword.length > 72) {
-    throw new AppError(400, '密码长度应为 6 到 72 个字符', 'VALIDATION_ERROR')
+  if (normalizedPassword.length < 6 || Buffer.byteLength(normalizedPassword, 'utf8') > 72 || !normalizedPassword.trim()) {
+    throw new AppError(400, '密码至少 6 个字符，且不能超过 72 字节或全部为空格', 'VALIDATION_ERROR')
   }
   return { username: normalizedUsername, password: normalizedPassword }
 }
@@ -29,8 +29,12 @@ async function register(input) {
     throw new AppError(409, '用户名已存在', 'USERNAME_EXISTS')
   }
   const passwordHash = await bcrypt.hash(password, 12)
-  const user = users.create(username, passwordHash)
-  return { user, token: createToken(user) }
+  try {
+    return { user: users.create(username, passwordHash) }
+  } catch (error) {
+    if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') throw new AppError(409, '用户名已存在', 'USERNAME_EXISTS')
+    throw error
+  }
 }
 
 async function login(input) {

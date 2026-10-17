@@ -1,0 +1,192 @@
+/* Workspace design tokens are scoped so the original login page stays intact. */
+.app-shell {
+  --ink: #2d253c;
+  --muted: #746e81;
+  --surface: #fff;
+  --line: #d9d5e3;
+}
+.app-shell .page-content > .head,
+.app-shell .page-content > .page-head {
+  padding: 8px 0 24px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--line);
+}
+.app-shell .page-content > .head h1,
+.app-shell .page-content > .page-head h1 {
+  font-size: 34px;
+  letter-spacing: -1px;
+  font-weight: 650;
+  color: var(--ink);
+  margin: 6px 0 8px;
+}
+.app-shell .page-content > .head p,
+.app-shell .page-content > .page-head p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.app-shell .el-input__wrapper {
+  min-height: 42px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #d4cfdf inset;
+}
+.app-shell .el-input__inner,
+.app-shell .el-textarea__inner,
+.app-shell .el-select__selected-item {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.app-shell .el-textarea__inner {
+  padding: 12px 14px;
+  box-shadow: 0 0 0 1px #d4cfdf inset;
+}
+.app-shell .el-select__wrapper {
+  min-height: 42px;
+  box-shadow: 0 0 0 1px #d4cfdf inset;
+}
+.app-shell .el-button {
+  min-height: 38px;
+  font-size: 14px;
+  border-radius: 7px;
+}
+.app-shell .el-button--primary:not(.is-plain) {
+  background: #6d4aff;
+  border-color: #6d4aff;
+  box-shadow: 0 4px 10px #2f1d4b10;
+}
+.app-shell .el-button--primary:not(.is-plain):hover {
+  background: #5738d5;
+  border-color: #5738d5;
+}
+.app-shell .el-form-item__label {
+  font-size: 14px;
+  color: #625b71;
+}
+.app-shell .setup-card,
+.app-shell .form-card,
+.app-shell .export-options,
+.app-shell .profile-grid > .card,
+.app-shell .panel {
+  border-radius: 13px;
+  border-color: #d9d5e3;
+  box-shadow: 0 5px 18px #29203a10;
+}
+.app-shell .section-head h2,
+.app-shell .form-card h2 {
+  font-size: 21px;
+  letter-spacing: -0.4px;
+  color: #342c43;
+}
+.app-shell .section-head small {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #7a6f93;
+}
+.app-shell .run-bar,
+.app-shell .export-action {
+  background: #edeaf5;
+  border-top: 1px solid #dad5e5;
+}
+.app-shell .tips,
+.app-shell .guide {
+  background: #292137;
+  border-color: #292137;
+  color: #ede9f7;
+  border-radius: 13px;
+  box-shadow: none;
+}
+.app-shell .tips > span,
+.app-shell .guide > span {
+  color: #af9be4;
+}
+.app-shell .tips ul,
+.app-shell .guide ul {
+  color: #bcb5cc;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.app-shell .tips h3,
+.app-shell .guide h3 {
+  font-size: 20px;
+}
+.app-shell .history {
+  border-color: #d9d5e3;
+  border-radius: 13px;
+  box-shadow: none;
+}
+.app-shell .history h3 {
+  font-size: 17px;
+}
+.app-shell .resume-options button.active {
+  border-color: #6a5993;
+  background: #ede9f7;
+}
+.app-shell .report-head h1 {
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: -1px;
+}
+.app-shell .summary {
+  background: #2a203a;
+  border-radius: 14px;
+  border: 1px solid #362b48;
+}
+.app-shell .summary > span {
+  color: #ac94e9;
+  font-size: 13px;
+}
+.app-shell .summary > p {
+  font-size: 18px;
+  line-height: 1.9;
+}
+.app-shell .summary .score-explanation {
+  color: #beb8cb;
+  font-size: 14px;
+}
+.app-shell .keyword-card,
+.app-shell .question-card,
+.app-shell .evidence-card {
+  border-color: #d9d5e3;
+  border-radius: 13px;
+}
+.app-shell .question-card {
+  background: #e9e5f3;
+}
+.app-shell .question-card > span {
+  color: #503f76;
+}
+.app-shell .chat-shell {
+  border-color: #d9d5e3;
+  border-radius: 14px;
+  height: calc(100dvh - 130px);
+}
+.app-shell .sessions {
+  background: #ebe8f2;
+  border-color: #d9d5e3;
+}
+.app-shell .session-item.active {
+  background: #d5ccea;
+  border-color: #b9add6;
+}
+.app-shell .bubble {
+  font-size: 15px;
+  line-height: 1.9;
+}
+@media (max-width: 700px) {
+  .app-shell .page-content > .head h1,
+  .app-shell .page-content > .page-head h1,
+  .app-shell .report-head h1 {
+    font-size: 28px;
+  }
+  .app-shell .page-content > .head p,
+  .app-shell .page-content > .page-head p {
+    font-size: 14px;
+  }
+  .app-shell .page-content > .head,
+  .app-shell .page-content > .page-head {
+    padding-bottom: 20px;
+  }
+  .app-shell .chat-shell {
+    height: calc(100dvh - 135px);
+  }
+}

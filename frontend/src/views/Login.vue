@@ -3,7 +3,8 @@
     <div class="bg-grid"></div>
     <div class="bg-glow"></div>
 
-    <div class="container">
+    <router-link to="/" class="back-home">← 返回首页，继续浏览</router-link>
+    <div class="container" :class="{ 'register-mode': !isLogin, 'has-notice': !!notice }">
       <!-- 左侧：插画互动区 -->
       <div class="illustration-side">
         <div class="character-group">
@@ -43,16 +44,30 @@
       <div class="form-side">
         <div class="form-wrapper">
           <div class="login-brand">
-            <span>简<i>↗</i></span>
+            <BrandMark alt="简跃品牌标识" />
             <div><b>简跃 AI</b><small>RESUMELEAP</small></div>
           </div>
           <!-- 切换 Tab -->
-          <div class="tab-header">
+          <div class="tab-header" role="tablist" aria-label="账号操作">
             <div class="tab-slider" :class="{ 'to-register': !isLogin }"></div>
-            <button type="button" @click="toggleMode(true)" :class="{ active: isLogin }">
+            <button
+              type="button"
+              role="tab"
+              :aria-selected="isLogin"
+              :disabled="loading"
+              @click="toggleMode(true)"
+              :class="{ active: isLogin }"
+            >
               登录
             </button>
-            <button type="button" @click="toggleMode(false)" :class="{ active: !isLogin }">
+            <button
+              type="button"
+              role="tab"
+              :aria-selected="!isLogin"
+              :disabled="loading"
+              @click="toggleMode(false)"
+              :class="{ active: !isLogin }"
+            >
               注册
             </button>
           </div>
@@ -63,66 +78,95 @@
               <p>{{ isLogin ? 'AI 赋能您的职业生涯' : '开启 30s 智能简历优化' }}</p>
             </header>
 
-            <transition name="fade-slide" mode="out-in">
-              <div :key="isLogin" class="form-content">
-                <!-- 融合 Element Plus 的表单组件，继承原有校验规则逻辑 -->
-                <el-form
-                  ref="formRef"
-                  :model="formData"
-                  :rules="formRules"
-                  label-position="top"
-                  status-icon
-                  @mouseenter="isDodging = true"
-                  @mouseleave="isDodging = false"
-                >
-                  <!-- 账号/邮箱 (登录与注册共有) -->
-                  <el-form-item prop="username">
-                    <el-input
-                      v-model="formData.username"
-                      placeholder="请输入用户名/邮箱"
-                      clearable
-                    />
-                  </el-form-item>
+            <div
+              v-if="notice"
+              class="auth-notice"
+              :class="noticeType"
+              role="status"
+              aria-live="polite"
+            >
+              {{ notice }}
+            </div>
+            <div class="form-content">
+              <!-- 融合 Element Plus 的表单组件，继承原有校验规则逻辑 -->
+              <el-form
+                ref="formRef"
+                :model="form"
+                :rules="rules"
+                label-position="top"
+                status-icon
+                :disabled="loading"
+                @submit.prevent="submit"
+                @mouseenter="isDodging = true"
+                @mouseleave="isDodging = false"
+              >
+                <!-- 账号/邮箱 (登录与注册共有) -->
+                <el-form-item prop="username">
+                  <el-input
+                    v-model="form.username"
+                    aria-label="用户名"
+                    autocomplete="username"
+                    placeholder="请输入用户名"
+                    maxlength="20"
+                    clearable
+                  />
+                </el-form-item>
 
-                  <!-- 密码 (登录与注册共有) -->
-                  <el-form-item prop="password">
-                    <el-input
-                      v-model="formData.password"
-                      type="password"
-                      placeholder="请输入密码"
-                      show-password
-                    />
-                  </el-form-item>
+                <!-- 密码 (登录与注册共有) -->
+                <el-form-item prop="password">
+                  <el-input
+                    v-model="form.password"
+                    type="password"
+                    aria-label="密码"
+                    :autocomplete="isLogin ? 'current-password' : 'new-password'"
+                    placeholder="请输入密码"
+                    show-password
+                  />
+                </el-form-item>
 
-                  <!-- 确认密码 (仅注册模式显示) -->
-                  <el-form-item v-if="!isLogin" prop="confirmPassword">
-                    <el-input
-                      v-model="formData.confirmPassword"
-                      type="password"
-                      placeholder="请再次输入密码"
-                      show-password
-                    />
-                  </el-form-item>
+                <!-- 确认密码 (仅注册模式显示) -->
+                <el-form-item v-if="!isLogin" prop="confirmPassword">
+                  <el-input
+                    v-model="form.confirmPassword"
+                    type="password"
+                    aria-label="确认密码"
+                    autocomplete="new-password"
+                    placeholder="请再次输入密码"
+                    show-password
+                  />
+                </el-form-item>
 
-                  <!-- 提交按钮 -->
-                  <el-form-item class="submit-item">
-                    <el-button
-                      type="primary"
-                      class="submit-btn shadow-anim"
-                      :loading="loading"
-                      @click="handleSubmit"
-                    >
-                      {{ isLogin ? '登 录' : '注 册' }}
-                    </el-button>
-                  </el-form-item>
-                </el-form>
-              </div>
-            </transition>
+                <!-- 提交按钮 -->
+                <el-form-item class="submit-item">
+                  <el-button
+                    type="primary"
+                    class="submit-btn shadow-anim"
+                    :aria-label="isLogin ? '登录并继续' : '注册账号'"
+                    :loading="loading"
+                    native-type="submit"
+                  >
+                    {{ isLogin ? '登 录' : '注 册' }}
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </div>
 
             <div class="form-footer">
-              <a href="#">忘记密码？</a>
+              <a
+                href="#"
+                @click.prevent="ElMessage.info('如需找回账号，请联系网站管理员核实身份。')"
+                >忘记密码？</a
+              >
               <span class="divider"></span>
-              <a href="#">隐私条款</a>
+              <a
+                href="#"
+                @click.prevent="
+                  ElMessage.info(
+                    '简历仅对当前账号可见；使用 AI 分析时，将发送所选简历文字和岗位内容用于处理。',
+                  )
+                "
+                >隐私说明</a
+              >
             </div>
           </div>
         </div>
@@ -133,104 +177,108 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import SiteFiling from '@/components/SiteFiling.vue'
-
-// --- 路由实例 ---
-const router = useRouter()
-const authStore = useAuthStore()
-
-// --- 状态定义 ---
-const isLogin = ref(true) // 模式切换：true-登录，false-注册
-const loading = ref(false) // 按钮加载状态
-const formRef = ref(null) // 表单实例引用
-const isDodging = ref(false) // 是否处于闪躲状态
-
-// --- 动效样式定义 ---
-const eyeStyle = reactive({ transform: 'translate(0, 0)' })
-const bodyStyle = reactive({ transform: 'rotate(0deg) translateX(0px)' })
-
-// --- 数据模型 ---
-const formData = reactive({
-  username: '',
-  password: '',
-  confirmPassword: '',
-})
-
-// --- 自定义校验规则：确认密码是否一致 ---
-const validateConfirmPassword = (rule, value, callback) => {
-  if (value === '') {
-    callback(new Error('请再次输入密码'))
-  } else if (value !== formData.password) {
-    callback(new Error('两次输入密码不一致!'))
-  } else {
-    callback()
-  }
-}
-
-// --- 校验规则配置 ---
-const formRules = reactive({
+import BrandMark from '@/components/BrandMark.vue'
+const route = useRoute(),
+  router = useRouter(),
+  auth = useAuthStore()
+const isLogin = ref(true),
+  loading = ref(false),
+  formRef = ref(),
+  notice = ref(''),
+  noticeType = ref('success')
+const form = reactive({ username: '', password: '', confirmPassword: '' })
+const rules = computed(() => ({
   username: [
-    { required: true, message: '账号不能为空', trigger: 'blur' },
-    { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' },
+    {
+      validator: (_rule, value, done) => {
+        const size = value.trim().length
+        done(size >= 3 && size <= 20 ? undefined : new Error('用户名长度应为 3 到 20 个字符'))
+      },
+      trigger: ['blur', 'change'],
+    },
   ],
   password: [
-    { required: true, message: '密码不能为空', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于 6 位', trigger: 'blur' },
+    {
+      validator: (_rule, value, done) =>
+        done(
+          value.trim() && value.length >= 6 && new TextEncoder().encode(value).length <= 72
+            ? undefined
+            : new Error('密码至少 6 个字符，最多 72 字节，且不能全为空格'),
+        ),
+      trigger: ['blur', 'change'],
+    },
   ],
-  confirmPassword: [{ validator: validateConfirmPassword, trigger: 'blur' }],
-})
-
-// --- 方法 ---
-
-// 切换登录/注册模式
-const toggleMode = (mode) => {
+  confirmPassword: [
+    {
+      validator: (_rule, value, done) =>
+        done(
+          isLogin.value || (value && value === form.password)
+            ? undefined
+            : new Error('两次密码输入不一致'),
+        ),
+      trigger: ['blur', 'change'],
+    },
+  ],
+}))
+async function toggleMode(mode) {
+  if (loading.value) return
   isLogin.value = mode
-  formRef.value?.resetFields() // 切换时重置表单状态和校验信息
+  form.password = ''
+  form.confirmPassword = ''
+  notice.value = ''
+  await nextTick()
+  formRef.value?.clearValidate()
 }
-
-// 提交逻辑
-const handleSubmit = async () => {
-  if (!formRef.value) return
-
-  // 执行表单全校验
-  await formRef.value.validate((valid) => {
-    if (valid) {
-      handleApiCall()
-    }
-  })
-}
-
-//  API 调用 (连接 Node 后端)
-const handleApiCall = async () => {
+async function submit() {
+  if (loading.value || !formRef.value) return
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
   loading.value = true
+  notice.value = ''
   try {
-    const data = await authStore.submit(
-      {
-        username: formData.username,
-        password: formData.password,
-      },
+    await auth.submit(
+      { username: form.username.trim(), password: form.password },
       isLogin.value ? 'login' : 'register',
     )
-
-    // 成功
-    if (data.success) {
-      ElMessage.success(data.message)
-      // 跳转到首页
-      router.push('/home')
+    if (!isLogin.value) {
+      isLogin.value = true
+      form.password = ''
+      form.confirmPassword = ''
+      await nextTick()
+      formRef.value?.clearValidate()
+      noticeType.value = 'success'
+      notice.value = '注册成功！请使用刚刚创建的账号登录。'
+      ElMessage.success('注册成功，请登录')
     } else {
-      ElMessage.error(data.message)
+      ElMessage.success('登录成功，欢迎回来')
+      const redirect = route.query.redirect
+      const target =
+        typeof redirect === 'string' &&
+        redirect.startsWith('/') &&
+        !redirect.startsWith('//') &&
+        !redirect.includes('\\') &&
+        !redirect.startsWith('/login')
+          ? redirect
+          : '/dashboard'
+      await router.replace(target)
     }
   } catch (error) {
-    ElMessage.error(error.response?.data?.message || '请求失败，请检查后端服务')
+    noticeType.value = 'error'
+    notice.value = error.response?.data?.message || '暂时无法连接服务，请稍后重试'
+    ElMessage.error(notice.value)
   } finally {
     loading.value = false
   }
 }
 
+const isDodging = ref(false)
+const eyeStyle = reactive({ transform: 'translate(0, 0)' }),
+  bodyStyle = reactive({ transform: 'rotate(0deg) translateX(0px)' })
 // 眼神与身体随鼠标移动/闪躲逻辑
 const handleMouseMove = (e) => {
   const { clientX, clientY } = e
@@ -261,18 +309,20 @@ const handleMouseMove = (e) => {
   eyeStyle.transform = `translate(${ex}px, ${ey}px)`
   bodyStyle.transform = `rotate(${br}deg) translateX(${bx}px)`
 }
-
-onMounted(() => window.addEventListener('mousemove', handleMouseMove))
-onUnmounted(() => window.removeEventListener('mousemove', handleMouseMove))
 </script>
-
 <style lang="scss" scoped>
 $purple: #6d4aff;
 $black: #1a1a1a;
 $orange: #ff9d6a;
 $yellow: #f0d949;
 
-.login-filing { position: absolute; left: 0; bottom: 10px; width: 100%; z-index: 20; }
+.login-filing {
+  position: absolute;
+  left: 0;
+  bottom: 10px;
+  width: 100%;
+  z-index: 20;
+}
 
 .login-page {
   position: relative;
@@ -455,24 +505,10 @@ $yellow: #f0d949;
       align-items: center;
       gap: 10px;
       margin-bottom: 22px;
-      > span {
-        position: relative;
-        display: grid;
-        place-items: center;
+      > img {
+        display: block;
         width: 38px;
         height: 38px;
-        border-radius: 11px;
-        background: $purple;
-        color: white;
-        font-weight: 800;
-      }
-      i {
-        position: absolute;
-        top: 1px;
-        right: 3px;
-        color: #d9d1ff;
-        font-size: 8px;
-        font-style: normal;
       }
       div {
         display: flex;
@@ -673,6 +709,123 @@ $yellow: #f0d949;
   }
   .form-side {
     padding: 40px 20px;
+  }
+}
+</style>
+
+<style scoped>
+.back-home {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  z-index: 12;
+  text-decoration: none;
+  color: #777b89;
+  font-size: 13px;
+}
+.login-page {
+  height: auto;
+  min-height: 100dvh;
+  padding: 65px 20px 100px;
+  overflow: visible;
+}
+.container {
+  flex-shrink: 0;
+}
+.container.register-mode,
+.container.has-notice {
+  height: 730px;
+}
+.auth-notice {
+  padding: 10px 14px;
+  margin: -15px 0 18px;
+  border-radius: 10px;
+  background: #edf8f0;
+  color: #267447;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.auth-notice.error {
+  background: #fff0ed;
+  color: #b24c42;
+}
+.login-filing {
+  bottom: 18px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+@media (max-width: 900px) {
+  .login-page {
+    padding: 64px 16px 100px;
+  }
+  .container,
+  .container.register-mode,
+  .container.has-notice {
+    height: auto;
+    max-width: 520px;
+  }
+  .illustration-side {
+    flex: none;
+    position: relative;
+    height: 230px;
+    overflow: hidden;
+  }
+  .character-group {
+    transform: scale(0.53);
+    transform-origin: bottom center;
+  }
+  .form-side {
+    padding: 25px 28px 34px;
+  }
+  .form-wrapper .tab-header {
+    margin-bottom: 25px;
+  }
+  .form-wrapper header {
+    margin-bottom: 25px;
+  }
+  .back-home {
+    left: 22px;
+  }
+  .login-filing {
+    padding: 0 15px !important;
+  }
+}
+@media (max-height: 760px) and (min-width: 901px) {
+  .login-page {
+    justify-content: flex-start;
+  }
+  .container {
+    margin: auto;
+  }
+}
+
+.container {
+  min-width: 0;
+  max-width: 100%;
+}
+.form-side,
+.illustration-side,
+.form-wrapper {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .character-group {
+    flex-shrink: 0;
+  }
+  .container {
+    width: 100%;
+  }
+}
+.login-page {
+  overflow-x: clip;
+}
+@media (max-width: 900px) {
+  .illustration-side {
+    height: 260px;
+  }
+  .character-group {
+    transform: scale(0.5);
   }
 }
 </style>

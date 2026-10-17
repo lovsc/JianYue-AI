@@ -3,7 +3,11 @@ import { defineStore } from 'pinia'
 import * as authApi from '@/api/auth'
 
 function readStoredUser() {
-  try { return JSON.parse(localStorage.getItem('current_user')) } catch { return null }
+  try {
+    return JSON.parse(localStorage.getItem('current_user'))
+  } catch {
+    return null
+  }
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -19,10 +23,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function submit(credentials, mode = 'login') {
-    const response = mode === 'login'
-      ? await authApi.login(credentials)
-      : await authApi.register(credentials)
-    saveSession(response.data.data)
+    const response =
+      mode === 'login' ? await authApi.login(credentials) : await authApi.register(credentials)
+    if (mode === 'login') saveSession(response.data.data)
     return response.data
   }
 
@@ -33,8 +36,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.data.data.user
       localStorage.setItem('current_user', JSON.stringify(user.value))
       return true
-    } catch {
-      logout()
+    } catch (error) {
+      if (error.response?.status === 401) logout()
       return false
     }
   }
@@ -45,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('current_user')
   }
+  window.addEventListener('auth:unauthorized', logout)
 
   function setUser(nextUser) {
     user.value = nextUser

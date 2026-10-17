@@ -15,7 +15,7 @@ const { asyncHandler } = require('../utils/async-handler')
 const { env } = require('../config/env')
 
 const router = express.Router()
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true })
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, message: { success: false, message: '尝试次数过多，请 15 分钟后重试', code: 'AUTH_RATE_LIMITED' } })
 const aiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: env.aiRateLimitMax,
@@ -41,6 +41,7 @@ router.get('/resumes/:id', authenticate, resumeController.get)
 router.patch('/resumes/:id', authenticate, resumeController.update)
 router.delete('/resumes/:id', authenticate, resumeController.remove)
 router.get('/resumes/:id/versions', authenticate, versionController.list)
+router.get('/resumes/:id/versions/:versionId', authenticate, versionController.get)
 router.post('/resumes/:id/versions', authenticate, versionController.create)
 router.post('/resumes/:id/versions/:versionId/restore', authenticate, versionController.restore)
 router.get('/jobs', authenticate, jobController.list)

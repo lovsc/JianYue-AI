@@ -1,80 +1,96 @@
 <template>
   <div class="print-page">
     <div class="toolbar">
-      <button @click="$router.back()">← 返回导出中心</button>
+      <router-link :to="{ path: '/exports', query: { resumeId: route.params.id, template } }"
+        >← 返回导出中心</router-link
+      >
       <div>
-        <span>打印设置：A4 · 边距默认 · 背景图形开启</span
-        ><button class="primary" :disabled="printing" @click="printPdf">
-          {{ printing ? '准备中...' : '打印 / 保存 PDF' }}
+        <button class="reading-toggle" @click="actualSize = !actualSize" :aria-pressed="actualSize">
+          {{ actualSize ? '适合屏幕' : '100% 阅读' }}
         </button>
+        <span>A4 · 缩放 100% · 关闭浏览器页眉页脚</span
+        ><el-button
+          type="primary"
+          :disabled="loading || !!error"
+          :loading="printing"
+          @click="printPdf"
+          >打印 / 保存 PDF</el-button
+        >
       </div>
     </div>
-    <div v-if="loading" class="loading">正在生成预览...</div>
-    <article v-else class="paper" :class="template">
-      <header>
-        <div>
-          <h1>{{ basics.name || '未填写姓名' }}</h1>
-          <p>{{ basics.summary }}</p>
+    <div v-if="loading" class="print-state">正在生成预览…</div>
+    <div v-else-if="error" class="print-state">
+      {{ error }}<el-button @click="load">重新加载</el-button>
+    </div>
+    <template v-else
+      ><div class="paper-viewport">
+        <div class="screen-paper" :class="{ 'actual-size': actualSize }">
+          <ResumePreview :content="resume.content" :template="template" />
         </div>
-        <span class="monogram">{{ basics.name?.slice(0, 1) || 'CV' }}</span>
-      </header>
-      <div class="contact">
-        <span v-if="basics.phone">{{ basics.phone }}</span
-        ><span v-if="basics.email">{{ basics.email }}</span
-        ><span v-if="basics.location">{{ basics.location }}</span>
       </div>
-      <ResumePrintSection
-        v-if="content.experience.length"
-        title="工作经历"
-        :items="content.experience"
-      /><ResumePrintSection
-        v-if="content.projects.length"
-        title="项目经历"
-        :items="content.projects"
-      /><ResumePrintSection
-        v-if="content.education.length"
-        title="教育经历"
-        :items="content.education"
-      />
-      <section v-if="content.skills.length" class="skills">
-        <h2>专业技能</h2>
-        <div>
-          <span v-for="skill in content.skills" :key="skill">{{ skill }}</span>
-        </div>
-      </section>
-      <footer>由简跃 AI · ResumeLeap 生成</footer>
-    </article>
+      <div class="print-paper">
+        <ResumeDocument :content="resume.content" :template="template" />
+      </div>
+      <p class="print-help">
+        在打印窗口选择“另存为 PDF”；开启背景图形，关闭页眉和页脚。打印记录不能确认文件是否已保存。
+      </p></template
+    >
+    <SiteFiling />
   </div>
 </template>
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import ResumePrintSection from '@/components/resume/ResumePrintSection.vue'
+import ResumeDocument from '@/components/resume/ResumeDocument.vue'
+import ResumePreview from '@/components/resume/ResumePreview.vue'
+import { resumeTemplates } from '@/utils/resume-templates'
 import { getResume } from '@/api/resumes'
 import { createExport } from '@/api/exports'
+import SiteFiling from '@/components/SiteFiling.vue'
 const route = useRoute(),
   loading = ref(true),
   printing = ref(false),
-  resume = ref({ content: { basics: {}, education: [], experience: [], projects: [], skills: [] } })
-const template = computed(() => (route.query.template === 'modern' ? 'modern' : 'classic')),
-  content = computed(() => resume.value.content),
-  basics = computed(() => content.value.basics || {})
-onMounted(async () => {
+  error = ref(''),
+  resume = ref({ content: {} })
+const previousTitle = document.title
+const actualSize = ref(false)
+const template = computed(() =>
+  resumeTemplates.some((item) => item.id === route.query.template)
+    ? route.query.template
+    : 'classic',
+)
+async function load() {
+  loading.value = true
+  error.value = ''
   try {
     resume.value = (await getResume(route.params.id)).data.data.resume
-    document.title = `${basics.value.name || resume.value.title}-简历`
+    document.title = [
+      resume.value.content.basics?.name || resume.value.title,
+      resume.value.content.basics?.position,
+      '简历',
+    ]
+      .filter(Boolean)
+      .join('-')
   } catch (e) {
-    ElMessage.error(e.response?.data?.message || '简历加载失败')
+    error.value = e.response?.data?.message || '简历加载失败'
   } finally {
     loading.value = false
   }
+}
+onMounted(load)
+onBeforeUnmount(() => {
+  document.title = previousTitle
 })
-const printPdf = async () => {
+async function printPdf() {
+  if (printing.value) return
   printing.value = true
   try {
+    await document.fonts.ready
+    await Promise.all(
+      [...document.querySelectorAll('.print-paper img')].map((img) => img.decode().catch(() => {})),
+    )
     await createExport({ resumeId: Number(route.params.id), template: template.value })
-    await new Promise((resolve) => setTimeout(resolve, 100))
     window.print()
   } catch (e) {
     ElMessage.error(e.response?.data?.message || '导出准备失败')
@@ -83,156 +99,84 @@ const printPdf = async () => {
   }
 }
 </script>
-<style scoped>
+<style>
 .print-page {
-  min-height: 100vh;
-  padding: 28px;
-  background: #dfe2e8;
-  color: #20232b;
+  --el-color-primary: #6d4aff;
+  min-height: 100dvh;
+  padding: 24px;
+  background: #eae7f0;
 }
 .toolbar {
-  position: sticky;
-  z-index: 10;
-  top: 15px;
-  max-width: 900px;
-  margin: 0 auto 22px;
-  padding: 11px 14px;
-  border-radius: 12px;
-  background: #171923;
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 30px #0003;
+  max-width: 950px;
+  margin: 0 auto 24px;
+  padding: 14px 18px;
+  background: #25283e;
+  color: white;
+  border-radius: 12px;
+  gap: 15px;
 }
-.toolbar button {
-  border: 0;
-  background: transparent;
-  color: #ccd1dc;
-  cursor: pointer;
+.toolbar > a {
+  font-size: 13px;
+  text-decoration: none;
 }
 .toolbar > div {
   display: flex;
   align-items: center;
-  gap: 17px;
+  gap: 16px;
 }
 .toolbar span {
-  color: #9299a8;
-  font-size: 12px;
-}
-.toolbar .primary {
-  padding: 9px 15px;
-  border-radius: 8px;
-  background: #6d4aff;
-  color: #fff;
-}
-.paper {
-  width: 210mm;
-  min-height: 297mm;
-  margin: auto;
-  padding: 18mm 17mm;
-  background: #fff;
-  box-shadow: 0 12px 45px #20263733;
-  font-family: Arial, 'Microsoft YaHei', sans-serif;
-}
-.paper header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding-bottom: 14px;
-  border-bottom: 3px solid #20232b;
-}
-.paper h1 {
-  font-size: 30px;
-  font-weight: 750;
-  letter-spacing: 2px;
-}
-.paper header p {
-  max-width: 610px;
-  margin-top: 7px;
-  color: #555d69;
-  line-height: 1.65;
-}
-.monogram {
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: #20232b;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 750;
-}
-.contact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 23px;
-  padding: 11px 0;
-  color: #4e5663;
-  font-size: 12px;
-}
-.contact span:not(:last-child)::after {
-  content: '·';
-  margin-left: 23px;
-  color: #bbb;
-}
-.skills {
-  margin-top: 20px;
-  break-inside: avoid;
-}
-.skills h2 {
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #bbb;
-  font-size: 16px;
-  font-weight: 750;
-}
-.skills div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-.skills span {
-  padding: 4px 9px;
-  background: #f1f2f4;
-  border-radius: 4px;
   font-size: 11px;
+  color: #bab1cd;
 }
-.paper footer {
-  margin-top: 28px;
-  padding-top: 8px;
-  border-top: 1px solid #ddd;
-  color: #aaa;
-  text-align: center;
-  font-size: 9px;
+.screen-paper {
+  width: 210mm;
+  max-width: 100%;
+  margin: auto;
 }
-.paper.modern {
-  padding-top: 0;
-  border-top: 13mm solid #6d4aff;
+.paper-viewport {
+  max-width: 100%;
+  overflow: auto;
+  padding: 0 0 14px;
 }
-.paper.modern header {
-  padding-top: 12mm;
-  border-bottom-color: #6d4aff;
+.screen-paper.actual-size {
+  width: 210mm;
+  max-width: none;
 }
-.paper.modern .monogram {
-  background: #6d4aff;
+.reading-toggle {
+  border: 1px solid #706880;
+  padding: 7px 11px;
+  background: transparent;
+  color: #d0c7e5;
+  font-size: 13px;
+  border-radius: 5px;
+  white-space: nowrap;
 }
-.paper.modern :deep(.resume-section h2),
-.paper.modern .skills h2 {
-  color: #6d4aff;
-  border-color: #cfc6ff;
+.print-paper {
+  display: none;
 }
-.loading {
+.print-state {
+  min-height: 50vh;
   display: grid;
-  place-items: center;
-  height: 70vh;
+  place-content: center;
+  gap: 20px;
+  color: #898093;
 }
-@media (max-width: 900px) {
-  .paper {
-    width: 100%;
-    min-height: auto;
-    padding: 30px;
+.print-help {
+  text-align: center;
+  font-size: 12px;
+  color: #92889e;
+  margin: 22px auto;
+  max-width: 700px;
+}
+@media (max-width: 650px) {
+  .print-page {
+    padding: 14px;
+  }
+  .toolbar {
+    padding: 12px;
   }
   .toolbar span {
     display: none;
@@ -241,30 +185,36 @@ const printPdf = async () => {
 @media print {
   @page {
     size: A4;
-    margin: 0;
+    margin: 12mm;
+  }
+  html,
+  body,
+  #app {
+    height: auto !important;
+    min-height: 0 !important;
+    background: white !important;
   }
   .print-page {
     padding: 0;
-    background: #fff;
+    background: white;
+    min-height: 0;
   }
   .toolbar,
-  .loading {
+  .screen-paper,
+  .paper-viewport,
+  .print-help,
+  .print-state,
+  .el-message {
     display: none !important;
   }
-  .paper {
-    width: 210mm;
-    min-height: 297mm;
-    margin: 0;
-    padding: 16mm 17mm;
+  .print-paper {
+    display: block;
+  }
+  .print-paper .resume-document {
+    width: 100%;
+    padding: 0;
+    min-height: 0;
     box-shadow: none;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .paper.modern {
-    padding-top: 0;
-  }
-  .paper footer {
-    display: none;
   }
 }
 </style>

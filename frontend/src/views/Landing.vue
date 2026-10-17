@@ -3,787 +3,1035 @@
     <div class="landing">
       <section class="hero">
         <div class="hero-copy">
-          <div class="brand-kicker">
-            <span class="brand-mini">简<i>↗</i></span
-            ><b>简跃 AI</b><em>RESUMELEAP</em>
-          </div>
-          <span class="eyebrow"><i></i> AI 驱动的职业跃迁空间</span>
-          <h1>把经历写清楚，<br /><em>向机会跃近一步。</em></h1>
-          <p>
-            从简历搭建、岗位匹配到面试准备，简跃 AI
-            将分散的求职任务连接成一条清晰、可回退、可持续优化的路径。
-          </p>
+          <div class="hero-eyebrow"><span class="hero-dot"></span>为下一次机会，做好准备</div>
+          <h1>把经历写清楚，<br /><em>向下一程跃进。</em></h1>
+          <p class="hero-description">整理真实经历、匹配目标岗位，准备好每一次投递。</p>
           <div class="hero-actions">
-            <el-button type="primary" size="large" @click="primaryAction">{{
-              stats.resumes ? '继续完善简历' : '创建第一份简历'
-            }}</el-button>
-            <button class="text-action" @click="$router.push('/analysis')">
-              体验岗位匹配 <span>↗</span>
-            </button>
-          </div>
-          <div class="trust">
-            <span><b>✓</b> 数据仅自己可见</span><span><b>✓</b> AI 修改可恢复</span
-            ><span><b>✓</b> 支持 PDF 导出</span>
+            <button class="primary-cta" @click="$router.push('/resumes')">
+              {{ stats.resumes ? '继续完善简历' : '创建第一份简历'
+              }}<AppIcon name="arrow" /></button
+            ><a href="#templates" class="secondary-cta">探索简历模板<span>↗</span></a>
           </div>
         </div>
-
-        <div class="hero-visual">
-          <div class="leap-word">LEAP</div>
-          <div class="leap-track"><i></i><i></i><i></i><i></i></div>
-          <div class="orb one"></div>
-          <div class="orb two"></div>
-          <article class="score-card">
-            <header><span>岗位匹配报告</span><small>刚刚更新</small></header>
-            <div class="score">
-              <strong>{{ displayScore }}</strong
-              ><span>/ 100</span>
-            </div>
-            <div class="progress"><i></i></div>
-            <p>你的项目经验与目标岗位高度相关</p>
-            <div class="tags"><span>Vue 3</span><span>工程化</span><span>性能优化</span></div>
-          </article>
-          <article class="suggest-card">
-            <span class="spark">✦</span>
-            <div><small>AI 优化建议</small><b>加入量化成果，让项目价值更具体</b></div>
-            <em>采纳</em>
-          </article>
-          <div class="floating-note">
-            <span>CV</span>
-            <div>
-              <b>{{ stats.resumes || 0 }} 份简历</b><small>持续积累你的职业资产</small>
-            </div>
-          </div>
+        <div class="hero-visual" role="img" aria-label="积累真实经历，梳理清晰表达，走向新的机会">
+          <svg class="leap-art" viewBox="0 0 360 250" fill="none" aria-hidden="true">
+            <circle cx="187" cy="126" r="107" fill="white" fill-opacity=".2" />
+            <path d="M77 210 203 84h-51V43h126v126h-41v-51L106 239Z" fill="#c8b8e9" />
+            <path d="M60 193 186 67h-51V26h126v126h-41v-51L89 222Z" fill="white" />
+            <path
+              d="m41 171 43-43M104 108l8-8"
+              stroke="#ad93d7"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <path
+              d="M303 185v15m-7.5-7.5h15M56 55v11m-5.5-5.5h11"
+              stroke="#9d7ccf"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <circle cx="307" cy="82" r="4" fill="#b19ad9" />
+          </svg>
+          <span class="opportunity-tag experience"><AppIcon name="spark" />真实经历</span>
+          <span class="opportunity-tag expression"><AppIcon name="check" />清晰表达</span>
+          <span class="opportunity-tag opportunity"><AppIcon name="arrow" />新的机会</span>
         </div>
       </section>
 
-      <section class="quick-start">
-        <header>
+      <section id="workflow" class="journey-section">
+        <div class="section-top">
           <div>
-            <span>YOUR NEXT STEP</span>
-            <h2>{{ progressTitle }}</h2>
+            <h2>三步，准备好下一次投递。</h2>
           </div>
-          <router-link to="/dashboard">查看工作台 →</router-link>
-        </header>
-        <div class="steps">
-          <button
+          <p>从整理经历，到带着准备出发。</p>
+        </div>
+        <div class="journey-cards">
+          <article
             v-for="(step, index) in steps"
             :key="step.title"
-            :class="{ done: step.done, active: step.active }"
-            @click="$router.push(step.to)"
+            class="journey-card"
+            :class="{ complete: step.done }"
           >
-            <div class="step-number">{{ step.done ? '✓' : `0${index + 1}` }}</div>
-            <span
-              ><b>{{ step.title }}</b
-              ><small>{{ step.description }}</small></span
-            ><em>→</em>
-          </button>
-        </div>
-      </section>
-
-      <section class="capabilities">
-        <div class="section-heading">
-          <span>ONE WORKFLOW</span>
-          <h2>求职准备，不再是零散的任务</h2>
-          <p>围绕同一份真实简历，让每一次分析、修改和对话都沉淀为可复用的职业资产。</p>
-        </div>
-        <div class="feature-grid">
-          <article class="feature primary">
-            <div class="feature-icon">01</div>
-            <span>结构化简历</span>
-            <h3>内容与版式分离，专注表达真正的价值</h3>
-            <p>实时预览、自动保存和版本快照，让长时间编辑更安心。</p>
-            <router-link to="/resumes">管理我的简历 →</router-link>
-            <div class="mini-resume"><i></i><i></i><i></i><i></i></div>
-          </article>
-          <article class="feature">
-            <div class="feature-icon purple">02</div>
-            <span>岗位匹配</span>
-            <h3>不只给分数，更告诉你下一步怎么改</h3>
-            <p>识别关键词、能力差距和表达问题，将建议准确应用到指定模块。</p>
-            <router-link to="/analysis">开始分析 →</router-link>
-          </article>
-          <article class="feature dark">
-            <div class="feature-icon">03</div>
-            <span>求职 AI 助手</span>
-            <h3>带着你的简历上下文，准备真正相关的问题</h3>
-            <p>流式对话、历史持久化，支持面试准备和项目表达训练。</p>
-            <router-link to="/chat">打开 AI 助手 →</router-link>
-          </article>
-          <article class="feature">
-            <div class="feature-icon orange">04</div>
-            <span>专业导出</span>
-            <h3>从在线内容到可投递 PDF</h3>
-            <p>两套 A4 模板、安全分页和导出历史，保证最终交付质量。</p>
-            <router-link to="/exports">前往导出中心 →</router-link>
+            <div class="journey-top">
+              <span>0{{ index + 1 }}</span
+              ><AppIcon :name="step.icon" />
+            </div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+            <button @click="$router.push(step.to)">{{ step.action }}<AppIcon name="arrow" /></button
+            ><small v-if="step.done" class="step-done">✓ 已完成这一步</small>
           </article>
         </div>
       </section>
 
-      <section class="bottom-cta">
+      <section id="capabilities" class="match-feature">
+        <div class="match-copy">
+          <span class="section-kicker">CLEAR WORDS. REAL EXPERIENCE.</span>
+          <h2>每一处修改，<br />都说得出理由。</h2>
+          <p>
+            对照真实岗位，找出表达上的差距。看清原文和建议的区别，再决定是否采纳。保留母简历，也保留每一次选择。
+          </p>
+          <div class="feature-points">
+            <span><AppIcon name="match" />原文匹配依据</span
+            ><span><AppIcon name="resume" />独立岗位版本</span
+            ><span><AppIcon name="shield" />修改前自动快照</span>
+          </div>
+          <router-link to="/analysis">分析我的目标岗位<AppIcon name="arrow" /></router-link>
+        </div>
+        <div class="match-demo">
+          <header>
+            <span><AppIcon name="spark" />表达优化工作区</span><small>功能演示</small>
+          </header>
+          <div class="before-copy">
+            <small>BEFORE / 原来的表达</small>
+            <p>负责日常行政工作，协助组织活动。</p>
+          </div>
+          <div class="after-copy">
+            <small>AFTER / 具体到真实职责</small>
+            <p>
+              负责会议安排、来访接待和办公用品登记；协助组织团队活动，跟进场地、物料与现场签到。
+            </p>
+            <span>说明实际工作，不编造经历与数字。</span>
+          </div>
+          <footer>
+            <span><AppIcon name="shield" />已保留修改前快照</span><b>对比后，再采纳 ↗</b>
+          </footer>
+        </div>
+      </section>
+
+      <section id="templates" class="template-section">
+        <div class="section-top">
+          <div>
+            <span class="section-kicker">FORM MEETS CONTENT</span>
+            <h2>好内容，也有好呈现。</h2>
+          </div>
+          <p>
+            三款专业版式，先预览再选择。<br /><button
+              class="sample-open"
+              @click="openSample('modern')"
+            >
+              放大阅读示例简历 <span>↗</span>
+            </button>
+          </p>
+        </div>
+        <div class="template-grid">
+          <article v-for="(item, index) in resumeTemplates" :key="item.id" class="template-card">
+            <button
+              class="template-paper"
+              :aria-label="'放大预览' + item.name"
+              @click="openSample(item.id)"
+            >
+              <TemplateThumbnail :template="item.id" /><span class="template-view"
+                >放大阅读<AppIcon name="arrow"
+              /></span>
+            </button>
+            <div class="template-meta">
+              <div>
+                <small>COLLECTION / 0{{ index + 1 }}</small>
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+              </div>
+              <i :style="{ background: item.color }"></i>
+            </div>
+            <button
+              class="template-use"
+              @click="$router.push({ path: '/exports', query: { template: item.id } })"
+            >
+              使用这款模板<AppIcon name="arrow" />
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section class="career-banner">
         <div>
-          <span>准备好迈出下一步了吗？</span>
-          <h2>从一份真实、清晰的简历开始。</h2>
+          <span>YOUR NEXT CHAPTER</span>
+          <h2>下一次机会，<br />从这一页开始。</h2>
+          <p>让认真做过的事，成为有分量的介绍。</p>
         </div>
-        <el-button size="large" @click="primaryAction">开始使用 <span>↗</span></el-button>
+        <div class="banner-action">
+          <button @click="$router.push('/resumes')">开始写我的简历<AppIcon name="arrow" /></button
+          ><router-link to="/chat">先和 AI 助手聊聊 ↗</router-link>
+        </div>
+        <span class="banner-arrow" aria-hidden="true">↗</span>
       </section>
     </div>
+    <el-dialog
+      v-model="sampleVisible"
+      title="示例简历 · 放大阅读"
+      width="900px"
+      class="sample-dialog"
+      ><div class="sample-toolbar">
+        <span>示例内容，不会写入你的简历</span
+        ><el-select v-model="sampleTemplate" aria-label="示例模板"
+          ><el-option
+            v-for="item in resumeTemplates"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+        /></el-select>
+      </div>
+      <ResumePreview :content="sampleResume" :template="sampleTemplate"
+    /></el-dialog>
   </AppLayout>
 </template>
-
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
+import AppIcon from '@/components/AppIcon.vue'
+import ResumePreview from '@/components/resume/ResumePreview.vue'
+import TemplateThumbnail from '@/components/resume/TemplateThumbnail.vue'
+import { resumeTemplates } from '@/utils/resume-templates'
+import { sampleResume } from '@/utils/resume-sample'
+import { useAuthStore } from '@/stores/auth'
 import { getDashboard } from '@/api/dashboard'
-
-const router = useRouter()
-const stats = reactive({
-  resumes: 0,
-  completed_resumes: 0,
-  analyses: 0,
-  chat_sessions: 0,
-  exports: 0,
-})
+const auth = useAuthStore(),
+  sampleVisible = ref(false),
+  sampleTemplate = ref('modern')
+const stats = reactive({ resumes: 0, analyses: 0, exports: 0 })
+const openSample = (template) => {
+  sampleTemplate.value = template
+  sampleVisible.value = true
+}
 onMounted(async () => {
+  if (!auth.isAuthenticated) return
   try {
     Object.assign(stats, (await getDashboard()).data.data.stats)
   } catch {
-    /* 首页仍可展示静态引导 */
+    /* The public product tour remains available. */
   }
-})
-const displayScore = computed(() => (stats.analyses ? 86 : 72))
-const progressTitle = computed(() => {
-  if (!stats.resumes) return '用三步完成第一次求职准备'
-  if (!stats.analyses) return '下一步：用真实岗位检验简历'
-  if (!stats.exports) return '分析已完成，生成一份投递版简历'
-  return '继续为新的机会做准备'
 })
 const steps = computed(() => [
   {
-    title: '创建并完善简历',
-    description: '建立你的结构化职业档案',
+    icon: 'resume',
+    title: '先把经历，完整留下来',
+    description: '整理教育、工作与项目经历，建立一份持续维护的母简历。',
+    action: '整理我的简历',
     to: '/resumes',
     done: stats.resumes > 0,
-    active: stats.resumes === 0,
   },
   {
-    title: '分析目标岗位',
-    description: '发现优势、差距与关键词',
+    icon: 'match',
+    title: '为心动岗位，找准方向',
+    description: '对照职位要求查看原文依据，在独立版本里调整表达。',
+    action: '开始岗位匹配',
     to: '/analysis',
     done: stats.analyses > 0,
-    active: stats.resumes > 0 && stats.analyses === 0,
   },
   {
-    title: '优化并导出 PDF',
-    description: '采纳建议，生成投递版本',
+    icon: 'export',
+    title: '让每次投递，都得体',
+    description: '选好版式，放大检查内容，导出一份清晰可读的简历。',
+    action: '选择导出版式',
     to: '/exports',
     done: stats.exports > 0,
-    active: stats.analyses > 0 && stats.exports === 0,
   },
 ])
-const primaryAction = () => router.push(stats.resumes ? '/resumes' : '/resumes')
 </script>
-
 <style scoped>
 .landing {
-  max-width: 1320px;
+  max-width: 1400px;
   margin: auto;
-  color: #171923;
+  color: #2b233a;
 }
 .hero {
-  position: relative;
   display: grid;
-  grid-template-columns: 1.02fr 0.98fr;
-  min-height: 570px;
-  overflow: hidden;
-  border-radius: 28px;
-  background: #f0eff8;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(#6d4aff0a 1px, transparent 1px),
-    linear-gradient(90deg, #6d4aff0a 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: linear-gradient(90deg, #000, transparent);
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.85fr);
+  align-items: center;
+  gap: 38px;
+  padding: 24px 30px;
+  border: 1px solid #dbcfef;
+  border-radius: 15px;
+  background: #e4dcf8;
+  color: #252338;
 }
 .hero-copy {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 65px 30px 65px 62px;
+  min-width: 0;
 }
-.brand-kicker {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 28px;
-}
-.brand-mini {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: #171923;
-  color: #fff;
-  font-weight: 800;
-}
-.brand-mini i {
-  position: absolute;
-  top: 1px;
-  right: 3px;
-  color: #b6a8ff;
-  font-size: 8px;
-  font-style: normal;
-}
-.brand-kicker b {
-  font-size: 15px;
-  font-weight: 750;
-}
-.brand-kicker > em {
-  padding-left: 9px;
-  border-left: 1px solid #c9c7d0;
-  color: #9895a2;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-}
-.eyebrow {
+.hero-eyebrow {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #6d4aff;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.6px;
+  color: #7155ba;
+  font-size: 13px;
 }
-.eyebrow i {
-  width: 18px;
-  height: 2px;
+.hero-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
   background: #6d4aff;
 }
 .hero h1 {
-  margin: 17px 0 21px;
-  font-size: 55px;
-  font-weight: 780;
-  line-height: 1.14;
-  letter-spacing: -2.5px;
+  margin: 12px 0 14px;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 .hero h1 em {
   color: #6d4aff;
   font-style: normal;
-  font-weight: 780;
 }
-.hero-copy > p {
-  max-width: 590px;
-  color: #626977;
-  font-size: 16px;
-  line-height: 1.85;
+.hero-description {
+  color: #756389;
+  font-size: 15px;
+  line-height: 1.8;
 }
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 22px;
-  margin-top: 31px;
-}
-.hero-actions :deep(.el-button) {
-  height: 48px;
-  padding: 0 25px;
-  border-radius: 12px;
-  background: #171923;
-  border-color: #171923;
-}
-.text-action {
-  border: 0;
-  background: none;
-  color: #343944;
-  font-weight: 650;
-  cursor: pointer;
-}
-.text-action span {
-  margin-left: 5px;
-  color: #6d4aff;
-}
-.trust {
-  display: flex;
   flex-wrap: wrap;
-  gap: 18px;
-  margin-top: 31px;
-  color: #858b98;
-  font-size: 12px;
+  gap: 20px;
+  margin-top: 22px;
 }
-.trust b {
-  color: #40a273;
+.primary-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 7px;
+  background: #6d4aff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 5px 12px #6d4aff1a;
+  transition: background 0.2s;
+}
+.primary-cta:hover {
+  background: #5738d5;
+}
+.secondary-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #625671;
+  font-size: 14px;
+  text-decoration: none;
 }
 .hero-visual {
   position: relative;
-  min-height: 570px;
+  width: 100%;
+  max-width: 370px;
+  height: 235px;
+  margin-left: auto;
+  isolation: isolate;
 }
-.leap-word {
-  position: absolute;
-  z-index: 1;
-  top: 15px;
-  right: -10px;
-  color: #ffffff25;
-  font-size: 118px;
-  font-weight: 900;
-  letter-spacing: -10px;
-  line-height: 1;
-}
-.leap-track {
-  position: absolute;
-  z-index: 1;
-  right: 20px;
-  bottom: 30px;
-  display: flex;
-  align-items: flex-end;
-  gap: 7px;
-  transform: skewY(-12deg);
-}
-.leap-track i {
+.leap-art {
   display: block;
-  width: 46px;
-  background: #ffffff22;
-  border: 1px solid #ffffff33;
-}
-.leap-track i:nth-child(1) {
-  height: 45px;
-}
-.leap-track i:nth-child(2) {
-  height: 78px;
-}
-.leap-track i:nth-child(3) {
-  height: 111px;
-}
-.leap-track i:nth-child(4) {
-  height: 144px;
-}
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(1px);
-}
-.orb.one {
-  width: 390px;
-  height: 390px;
-  top: 76px;
-  right: 70px;
-  background: linear-gradient(145deg, #6d4aff, #4b2ecf);
-}
-.orb.two {
-  width: 180px;
-  height: 180px;
-  right: -30px;
-  bottom: -20px;
-  background: #ffb27d;
-}
-.score-card {
-  position: absolute;
-  z-index: 2;
-  top: 95px;
-  right: 82px;
-  width: 350px;
-  padding: 26px;
-  border: 1px solid #ffffff88;
-  border-radius: 22px;
-  background: #ffffffed;
-  box-shadow: 0 30px 65px #29204933;
-  backdrop-filter: blur(15px);
-  transform: rotate(1.5deg);
-}
-.score-card header {
-  display: flex;
-  justify-content: space-between;
-}
-.score-card header span {
-  font-weight: 700;
-}
-.score-card header small {
-  color: #999;
-}
-.score {
-  margin: 24px 0 11px;
-}
-.score strong {
-  font-size: 56px;
-  font-weight: 800;
-}
-.score span {
-  color: #999;
-}
-.progress {
-  height: 7px;
-  overflow: hidden;
-  border-radius: 5px;
-  background: #e7e5ed;
-}
-.progress i {
-  display: block;
-  width: 86%;
+  width: 100%;
   height: 100%;
-  border-radius: 5px;
-  background: #6d4aff;
 }
-.score-card > p {
-  margin: 15px 0;
-  color: #626977;
-}
-.tags {
-  display: flex;
-  gap: 7px;
-}
-.tags span {
-  padding: 5px 9px;
-  border-radius: 8px;
-  background: #efecff;
-  color: #6d4aff;
-  font-size: 11px;
-}
-.suggest-card {
+.opportunity-tag {
   position: absolute;
-  z-index: 3;
-  right: 25px;
-  bottom: 85px;
-  width: 330px;
   display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  background: white;
+  border: 1px solid #dcd0ef;
+  border-radius: 8px;
+  color: #786092;
+  box-shadow: 0 8px 18px #5e418211;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.opportunity-tag .app-icon {
+  width: 16px;
+  height: 16px;
+  color: #9b7cc9;
+}
+.opportunity-tag.experience {
+  top: 17px;
+  left: 0;
+  transform: rotate(-5deg);
+}
+.opportunity-tag.expression {
+  bottom: 7px;
+  left: 25px;
+  transform: rotate(-3deg);
+}
+.opportunity-tag.opportunity {
+  top: 83px;
+  right: 0;
+  transform: rotate(5deg);
+}
+.sample-open {
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  border-radius: 16px;
-  background: #171923;
-  color: #fff;
-  box-shadow: 0 18px 40px #10121c55;
-}
-.spark {
-  display: grid;
-  place-items: center;
-  width: 39px;
-  height: 39px;
-  flex: none;
-  border-radius: 11px;
-  background: #6d4aff;
-}
-.suggest-card div {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-}
-.suggest-card small {
-  color: #969dac;
-}
-.suggest-card b {
-  font-size: 12px;
-  font-weight: 650;
-}
-.suggest-card em {
-  padding: 5px 8px;
-  border-radius: 7px;
-  background: #fff;
-  color: #171923;
-  font-size: 10px;
-  font-style: normal;
-}
-.floating-note {
-  position: absolute;
-  z-index: 3;
-  bottom: 42px;
-  left: 5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 12px 30px #25214833;
-}
-.floating-note > span {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 40px;
-  border-radius: 7px;
-  background: #eeeaff;
+  border: 0;
+  background: transparent;
+  padding: 4px 0 0;
   color: #6d4aff;
-  font-weight: 800;
+  font-size: 14px;
 }
-.floating-note div {
+.sample-open:hover {
+  color: #5738d5;
+}
+
+.journey-section,
+.template-section {
+  padding-top: 76px;
+  scroll-margin-top: 30px;
+}
+.journey-section {
+  padding-top: 28px;
+}
+.journey-section .section-top h2 {
+  font-size: 26px;
+  margin: 0;
+}
+.journey-section .section-top {
+  margin-bottom: 18px;
+}
+.section-top {
   display: flex;
-  flex-direction: column;
-}
-.floating-note b {
-  font-size: 12px;
-  font-weight: 700;
-}
-.floating-note small {
-  color: #999;
-  font-size: 10px;
-}
-.quick-start {
-  margin: 24px 0;
-  padding: 26px 29px;
-  border: 1px solid #e6e7ed;
-  border-radius: 20px;
-  background: #fff;
-}
-.quick-start > header {
-  display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: end;
+  gap: 24px;
+  margin-bottom: 32px;
 }
-.quick-start header span,
-.section-heading > span {
-  color: #6d4aff;
+.section-kicker {
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 2.5px;
+  color: #887ea1;
 }
-.quick-start h2 {
-  font-size: 21px;
-  font-weight: 720;
+.section-top h2 {
+  font-size: 38px;
+  line-height: 1.4;
+  letter-spacing: -1.2px;
+  font-weight: 550;
+  margin-top: 16px;
+  color: #342c44;
 }
-.quick-start header a {
-  color: #6d4aff;
-  text-decoration: none;
+.section-top > p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #7c7490;
+  max-width: 390px;
 }
-.steps {
+.journey-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 11px;
-  margin-top: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #d7d3e2;
+  border-radius: 13px;
+  background: white;
+  overflow: hidden;
 }
-.steps button {
+.journey-card {
+  position: relative;
+  padding: 22px;
+  border-right: 1px solid #d7d3e2;
+}
+.journey-card:last-child {
+  border: 0;
+}
+.journey-top {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 15px;
-  border: 1px solid #e7e8ed;
-  border-radius: 13px;
-  background: #fafbfc;
-  text-align: left;
-  cursor: pointer;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
-.steps button.active {
-  border-color: #6d4aff;
-  background: #f7f5ff;
+.journey-top > span {
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-style: italic;
+  font-weight: 400;
+  color: #a69ac3;
+  line-height: 1;
 }
-.steps button.done {
-  background: #f5faf7;
+.journey-top > .app-icon {
+  width: 22px;
+  height: 22px;
+  color: #81759f;
 }
-.step-number {
-  display: grid;
-  place-items: center;
-  width: 37px;
-  height: 37px;
-  flex: none;
-  border-radius: 10px;
-  background: #e9e8ed;
-  color: #555;
-  font-size: 11px;
-  font-weight: 800;
+.journey-card h3 {
+  font-size: 19px;
+  font-weight: 550;
+  letter-spacing: -0.4px;
 }
-.steps .active .step-number {
-  background: #6d4aff;
-  color: #fff;
+.journey-card > p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #7e7790;
+  margin: 11px 0 17px;
 }
-.steps .done .step-number {
-  background: #dff2e7;
-  color: #278052;
-}
-.steps button > span {
+.journey-card > button {
+  border: 0;
+  background: none;
+  padding: 0;
   display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #493c63;
+  font-size: 14px;
 }
-.steps b {
-  font-weight: 650;
+.journey-card > button > .app-icon {
+  width: 17px;
 }
-.steps small {
-  color: #9297a2;
-}
-.steps em {
-  font-style: normal;
-}
-.capabilities {
-  padding: 75px 0 20px;
-}
-.section-heading {
-  max-width: 620px;
-  margin: 0 auto 35px;
-  text-align: center;
-}
-.section-heading h2 {
-  margin: 8px 0 10px;
-  font-size: 34px;
-  font-weight: 760;
-}
-.section-heading p {
-  color: #7b8290;
-}
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 16px;
-}
-.feature {
-  position: relative;
-  min-height: 285px;
-  overflow: hidden;
-  padding: 29px;
-  border: 1px solid #e4e6ec;
-  border-radius: 21px;
-  background: #fff;
-}
-.feature.primary {
-  background: #f0eff8;
-}
-.feature.dark {
-  background: #171923;
-  color: #fff;
-}
-.feature-icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: #171923;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-}
-.feature-icon.purple {
-  background: #eeeaff;
-  color: #6d4aff;
-}
-.feature-icon.orange {
-  background: #fff0e5;
-  color: #cc6b29;
-}
-.feature > span {
+.step-done {
   display: block;
-  margin-top: 24px;
-  color: #868c98;
   font-size: 11px;
-  font-weight: 750;
+  color: #83799b;
+  margin-top: 15px;
+}
+.match-feature {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 36px;
+  align-items: center;
+  padding: 30px;
+  margin-top: 36px;
+  background: #e4dcf8;
+  border: 1px solid #d5cfe4;
+  border-radius: 15px;
+}
+.match-copy h2 {
+  font-size: 30px;
+  line-height: 1.45;
+  font-weight: 550;
+  letter-spacing: -1px;
+  margin: 18px 0 21px;
+}
+.match-copy > p {
+  font-size: 16px;
+  line-height: 1.95;
+  color: #766e89;
+}
+.feature-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 25px;
+  color: #645880;
+  font-size: 13px;
+}
+.feature-points > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.feature-points .app-icon {
+  width: 15px;
+  height: 15px;
+}
+.match-copy > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 15px;
+  color: #41345a;
+  text-decoration: none;
+  margin-top: 30px;
+}
+.match-demo {
+  background: #fffefe;
+  border: 1px solid #cfc9df;
+  border-radius: 10px;
+  box-shadow: 0 20px 35px #362b500c;
+  overflow: hidden;
+}
+.match-demo > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 21px;
+  border-bottom: 1px solid #dfdbe9;
+}
+.match-demo > header > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4e426a;
+}
+.match-demo > header small {
+  font-size: 12px;
+  color: #968dac;
+}
+.match-demo .app-icon {
+  width: 17px;
+  height: 17px;
+}
+.before-copy,
+.after-copy {
+  padding: 15px 18px;
+  margin: 14px;
+  background: #f0eff5;
+  border-left: 2px solid #d5cbbd;
+}
+.before-copy small,
+.after-copy small {
+  font-size: 10px;
+  color: #a59885;
   letter-spacing: 1px;
 }
-.feature h3 {
-  max-width: 450px;
-  margin: 7px 0 10px;
-  font-size: 22px;
-  font-weight: 720;
+.before-copy p {
+  font-size: 15px;
+  color: #a39a89;
+  text-decoration: line-through;
+  text-decoration-color: #c9c1b1;
+  margin-top: 12px;
+  line-height: 1.8;
 }
-.feature p {
-  max-width: 430px;
-  color: #7c8390;
-  line-height: 1.7;
+.after-copy {
+  background: #e4dcf8;
+  border-color: #836eb8;
 }
-.feature.dark p {
-  color: #aeb4c1;
+.after-copy small {
+  color: #706098;
 }
-.feature a {
-  display: inline-block;
-  margin-top: 22px;
-  color: #6d4aff;
-  text-decoration: none;
-  font-weight: 650;
+.after-copy p {
+  font-size: 17px;
+  color: #4b3d6d;
+  line-height: 1.8;
+  margin-top: 10px;
 }
-.feature.dark a {
-  color: #a695ff;
-}
-.mini-resume {
-  position: absolute;
-  right: -20px;
-  bottom: -35px;
-  width: 180px;
-  height: 220px;
-  padding: 25px 20px;
-  background: #fff;
-  box-shadow: 0 15px 35px #2222;
-  transform: rotate(8deg);
-}
-.mini-resume i {
+.after-copy > span {
   display: block;
-  height: 6px;
-  margin-bottom: 13px;
-  background: #d8dae0;
+  font-size: 12px;
+  color: #897ea5;
+  margin-top: 14px;
 }
-.mini-resume i:first-child {
-  width: 55%;
-  height: 17px;
-  background: #6d4aff;
+.match-demo > footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 17px 21px;
+  background: #f1eff7;
+  font-size: 12px;
+  color: #80759a;
 }
-.bottom-cta {
+.match-demo > footer > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.match-demo > footer > b {
+  font-weight: 500;
+  color: #52417b;
+}
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.template-card {
+  min-width: 0;
+}
+.template-paper {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 24px;
+  background: #e4dcf8;
+  border: 1px solid #d2cbe2;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.template-view {
+  position: absolute;
+  bottom: 17px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px;
+  background: #282036ed;
+  color: #e5dff3;
+  font-size: 14px;
+  border-radius: 5px;
+  opacity: 0;
+  translate: 0 5px;
+  transition:
+    opacity 0.2s,
+    translate 0.2s;
+}
+.template-paper:hover .template-view,
+.template-paper:focus-visible .template-view {
+  opacity: 1;
+  translate: 0 0;
+}
+.template-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 70px 0 15px;
-  padding: 38px 45px;
-  border-radius: 24px;
-  background: #6d4aff;
-  color: #fff;
+  gap: 16px;
+  margin-top: 21px;
 }
-.bottom-cta span {
-  color: #d7d0ff;
+.template-meta small {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #928ba4;
 }
-.bottom-cta h2 {
-  font-size: 29px;
-  font-weight: 740;
+.template-meta h3 {
+  font-size: 21px;
+  font-weight: 550;
+  margin: 8px 0 9px;
 }
-.bottom-cta :deep(.el-button) {
+.template-meta p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #837b96;
+}
+.template-meta > i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+.template-use {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 15px 0;
   border: 0;
-  color: #171923;
+  border-top: 1px solid #d1cbdf;
+  background: none;
+  color: #504171;
+  font-size: 14px;
+  margin-top: 21px;
 }
-.bottom-cta :deep(.el-button span) {
-  color: #171923;
+.template-use .app-icon {
+  width: 17px;
 }
-@media (max-width: 1100px) {
-  .hero {
+.career-banner {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 47px 48px;
+  margin-top: 76px;
+  background: #e4dcf8;
+  border-radius: 13px;
+  overflow: hidden;
+  color: #352b4b;
+}
+.career-banner > div {
+  z-index: 1;
+}
+.career-banner > div > span {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: #695992;
+}
+.career-banner h2 {
+  font-size: 40px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -1.2px;
+  margin: 19px 0;
+}
+.career-banner p {
+  font-size: 15px;
+  color: #66578c;
+}
+.banner-action {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  align-items: center;
+}
+.banner-action > button {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border: 0;
+  padding: 17px 24px;
+  border-radius: 7px;
+  background: #2b203d;
+  color: #ded6f1;
+  font-size: 16px;
+}
+.banner-action > a {
+  font-size: 14px;
+  color: #695793;
+  text-decoration: none;
+}
+.banner-arrow {
+  position: absolute;
+  right: 140px;
+  bottom: -65px;
+  font-size: 350px;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+  color: #a28cdb;
+  z-index: 0;
+}
+.sample-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #7e788c;
+}
+.sample-toolbar .el-select {
+  width: 170px;
+}
+@media (max-width: 1200px) {
+  .match-feature {
+    gap: 36px;
+    padding: 36px;
+  }
+  .match-copy h2 {
+    font-size: 32px;
+  }
+  .template-grid {
+    gap: 19px;
+  }
+  .template-paper {
+    padding: 17px;
+  }
+}
+@media (max-width: 1000px) {
+  .match-feature {
     grid-template-columns: 1fr;
+    gap: 34px;
   }
-  .hero-copy {
-    padding: 55px;
+  .section-top h2 {
+    font-size: 34px;
   }
-  .hero-visual {
-    display: none;
+  .template-grid {
+    gap: 15px;
   }
-  .steps {
-    grid-template-columns: 1fr;
+  .template-paper {
+    padding: 13px;
   }
-  .feature-grid {
-    grid-template-columns: 1fr;
+  .template-meta h3 {
+    font-size: 18px;
+  }
+  .template-meta p {
+    font-size: 13px;
+  }
+  .career-banner h2 {
+    font-size: 35px;
+  }
+  .career-banner {
+    padding: 36px;
   }
 }
 @media (max-width: 700px) {
-  .hero-copy {
-    padding: 38px 25px;
+  .template-section {
+    padding-top: 52px;
+  }
+  .section-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+  .section-top h2 {
+    font-size: 31px;
+    margin-top: 13px;
+  }
+  .section-top > p {
+    font-size: 15px;
+  }
+  .section-top > p br {
+    display: none;
+  }
+  .match-feature {
+    padding: 23px 18px;
+    margin-top: 47px;
+    gap: 28px;
+  }
+  .match-copy h2 {
+    font-size: 30px;
+  }
+  .match-copy > p {
+    font-size: 15px;
+  }
+  .feature-points {
+    font-size: 13px;
+    gap: 15px;
+  }
+  .match-demo > header {
+    padding: 16px 14px;
+  }
+  .match-demo > header > span {
+    font-size: 13px;
+  }
+  .match-demo > header small {
+    font-size: 11px;
+  }
+  .before-copy,
+  .after-copy {
+    padding: 17px 16px;
+    margin: 14px;
+  }
+  .after-copy p {
+    font-size: 16px;
+  }
+  .match-demo > footer {
+    padding: 15px;
+    font-size: 11px;
+  }
+  .template-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .template-paper {
+    padding: 25px;
+  }
+  .template-view {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .template-meta h3 {
+    font-size: 22px;
+  }
+  .template-meta p {
+    font-size: 14px;
+  }
+  .career-banner {
+    padding: 31px 25px;
+    align-items: flex-start;
+    flex-direction: column;
+    margin-top: 48px;
+  }
+  .career-banner h2 {
+    font-size: 35px;
+  }
+  .career-banner p {
+    font-size: 15px;
+  }
+  .banner-action {
+    align-items: flex-start;
+  }
+  .banner-action > button {
+    font-size: 15px;
+  }
+  .banner-arrow {
+    right: -30px;
+    bottom: -70px;
+    font-size: 300px;
+  }
+  .sample-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.85fr);
+    gap: 22px;
+    padding: 22px;
   }
   .hero h1 {
-    font-size: 39px;
+    font-size: 34px;
   }
-  .trust {
-    display: grid;
+  .hero-actions {
+    gap: 15px;
   }
-  .quick-start {
-    padding: 22px 18px;
+  .hero-visual {
+    height: 220px;
   }
-  .bottom-cta {
-    align-items: flex-start;
-    gap: 20px;
-    flex-direction: column;
-    padding: 30px;
+  .opportunity-tag {
+    padding: 8px 11px;
+    font-size: 12px;
   }
-  .section-heading h2 {
-    font-size: 28px;
+  .journey-card {
+    padding: 18px;
+  }
+  .journey-card h3 {
+    font-size: 17px;
+  }
+  .journey-section .section-top {
+    align-items: baseline;
+  }
+  .journey-section .section-top h2 {
+    font-size: 24px;
+  }
+}
+@media (max-width: 700px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 21px;
+    gap: 22px;
+    border-radius: 12px;
+  }
+  .hero h1 {
+    font-size: clamp(29px, 9vw, 36px);
+  }
+  .hero-actions {
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .primary-cta {
+    font-size: 14px;
+    padding: 0 15px;
+    gap: 10px;
+  }
+  .secondary-cta {
+    font-size: 13px;
+  }
+  .hero-visual {
+    max-width: 310px;
+    height: 205px;
+    margin: auto;
+  }
+  .opportunity-tag {
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+  .opportunity-tag.experience {
+    top: 8px;
+  }
+  .opportunity-tag.expression {
+    bottom: 0;
+  }
+  .opportunity-tag.opportunity {
+    top: 72px;
+  }
+  .journey-section {
+    padding-top: 25px;
+  }
+  .journey-section .section-top {
+    gap: 6px;
+    margin-bottom: 17px;
+  }
+  .journey-section .section-top h2 {
+    font-size: 23px;
+    margin-top: 0;
+  }
+  .journey-section .section-top > p {
+    font-size: 14px;
+  }
+  .journey-cards {
+    grid-template-columns: 1fr;
+  }
+  .journey-card {
+    padding: 19px;
+    border-right: 0;
+    border-bottom: 1px solid #e4deef;
+  }
+  .journey-top {
+    margin-bottom: 10px;
+  }
+  .journey-card h3 {
+    font-size: 18px;
+  }
+  .journey-card > p {
+    margin: 9px 0 13px;
+  }
+  .match-feature {
+    margin-top: 30px;
   }
 }
 </style>

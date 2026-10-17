@@ -25,6 +25,6 @@ jobs:
             backend/package-lock.json
       - run: npm ci --prefix frontend --no-audit --no-fund
       - run: npm ci --prefix backend --no-audit --no-fund
-      - run: npm run test:deployment --prefix backend
+      - run: npm test --prefix backend
       - run: python3 -m unittest discover -s deploy/tests -v
       - run: npm run build --prefix frontend

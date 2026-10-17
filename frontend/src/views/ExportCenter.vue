@@ -1,4 +1,365 @@
-<template><AppLayout><header class="head"><div><span>RESUME DELIVERY</span><h1>简历导出中心</h1><p>选择简历与专业模板，生成适合投递和打印的 PDF。</p></div></header><div class="layout"><main><section class="card"><div class="section-title"><b>01</b><h2>选择简历</h2></div><div v-if="!resumes.length" class="empty">暂无简历，请先前往“我的简历”创建。</div><div v-else class="resume-grid"><button v-for="item in resumes" :key="item.id" :class="{active:resumeId===item.id}" @click="resumeId=item.id"><span>CV</span><div><b>{{ item.title }}</b><small>{{ item.content?.basics?.name||'未填写姓名' }}</small></div><em>{{ resumeId===item.id?'✓':'' }}</em></button></div></section><section class="card"><div class="section-title"><b>02</b><h2>选择版式</h2></div><div class="templates"><button v-for="item in templates" :key="item.id" :class="{active:template===item.id}" @click="template=item.id"><div class="mini" :class="item.id"><i></i><i></i><i></i><i></i></div><span><b>{{ item.name }}</b><small>{{ item.description }}</small></span></button></div><div class="action"><div><b>浏览器打印为 PDF</b><small>在打印窗口中选择“另存为 PDF”，纸张请选择 A4。</small></div><el-button type="primary" size="large" :disabled="!resumeId" @click="preview">进入打印预览</el-button></div></section></main><aside><section class="guide"><span>导出检查</span><h3>投递前建议确认</h3><ul><li>联系方式准确且保持畅通</li><li>项目成果尽量使用数字量化</li><li>控制在 1–2 页以内</li><li>文件名包含姓名与目标岗位</li></ul></section><section class="history"><h3>最近导出</h3><div v-if="!records.length" class="none">暂无导出记录</div><article v-for="item in records.slice(0,8)" :key="item.id"><span>PDF</span><div><b>{{ item.resume_title }}</b><small>{{ templateName(item.template) }} · {{ formatDate(item.created_at) }}</small></div></article></section></aside></div></AppLayout></template>
-<script setup>import{onMounted,ref}from'vue';import{useRouter}from'vue-router';import{ElMessage}from'element-plus';import AppLayout from'@/layouts/AppLayout.vue';import{listResumes}from'@/api/resumes';import{listExports}from'@/api/exports';const router=useRouter(),resumes=ref([]),records=ref([]),resumeId=ref(null),template=ref('classic');const templates=[{id:'classic',name:'经典专业',description:'清晰稳重，适合技术和传统行业'},{id:'modern',name:'现代简约',description:'视觉鲜明，适合互联网与创意岗位'}];onMounted(async()=>{try{const[r,e]=await Promise.all([listResumes(),listExports()]);resumes.value=r.data.data.resumes;records.value=e.data.data.exports;if(resumes.value.length)resumeId.value=resumes.value[0].id}catch(e){ElMessage.error(e.response?.data?.message||'加载失败')}});const preview=()=>router.push({name:'resume-print',params:{id:resumeId.value},query:{template:template.value}});const templateName=id=>templates.find(x=>x.id===id)?.name||id;const formatDate=v=>new Date(v.replace(' ','T')+'Z').toLocaleDateString('zh-CN')</script>
-<style scoped>.head{margin-bottom:27px}.head span{color:#6d4aff;font-size:11px;font-weight:800;letter-spacing:2px}.head h1{margin:5px 0;font-size:31px;font-weight:760}.head p{color:#7e8491}.layout{display:grid;grid-template-columns:minmax(550px,1fr) 300px;gap:22px}.card,.guide,.history{background:#fff;border:1px solid #e5e7ed;border-radius:20px;box-shadow:0 8px 28px #252c4010}.card{margin-bottom:18px;padding:27px}.section-title{display:flex;align-items:center;gap:10px;margin-bottom:17px}.section-title>b{color:#6d4aff;font-size:11px}.section-title h2{font-size:19px;font-weight:700}.resume-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.resume-grid button{display:flex;align-items:center;gap:11px;padding:14px;border:1px solid #e4e6ec;border-radius:12px;background:#fff;text-align:left;cursor:pointer}.resume-grid button.active{border-color:#6d4aff;background:#f8f6ff}.resume-grid button>span{display:grid;place-items:center;width:38px;height:42px;border-radius:8px;background:#eeeaff;color:#6d4aff;font-weight:800}.resume-grid button div{display:flex;min-width:0;flex:1;flex-direction:column}.resume-grid button b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:650}.resume-grid small{color:#9297a2}.resume-grid em{color:#6d4aff;font-style:normal}.templates{display:grid;grid-template-columns:1fr 1fr;gap:14px}.templates>button{display:flex;gap:15px;padding:14px;border:1px solid #e1e3e9;border-radius:14px;background:#fff;text-align:left;cursor:pointer}.templates>button.active{border:2px solid #6d4aff;padding:13px}.templates>button>span{display:flex;flex-direction:column}.templates b{font-weight:700}.templates small{color:#8c929f}.mini{width:68px;height:88px;padding:9px;background:#fff;border:1px solid #dfe1e6;box-shadow:0 3px 8px #2222}.mini i{display:block;height:4px;margin-bottom:6px;background:#cdd1d9}.mini i:first-child{height:10px;background:#333}.mini.modern{border-top:8px solid #6d4aff}.mini.modern i:first-child{background:#6d4aff}.action{display:flex;align-items:center;justify-content:space-between;margin:24px -27px -27px;padding:19px 27px;border-radius:0 0 20px 20px;background:#fafafe}.action div{display:flex;flex-direction:column}.action b{font-weight:650}.action small{color:#8a909d}.guide{padding:22px;background:#171923;color:#fff}.guide>span{color:#9c8bff;font-size:11px;font-weight:750}.guide h3{margin:7px 0 14px;font-size:18px;font-weight:680}.guide ul{display:grid;gap:9px;padding-left:19px;color:#bac0cc}.history{margin-top:18px;padding:20px}.history h3{font-size:17px;font-weight:700}.history article{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #eee}.history article>span{padding:5px;border-radius:6px;background:#feecea;color:#c64d43;font-size:10px;font-weight:750}.history article div{display:flex;min-width:0;flex-direction:column}.history article b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:650}.history article small{color:#9297a2}.none,.empty{padding:30px;color:#9297a2;text-align:center}@media(max-width:950px){.layout{grid-template-columns:1fr}.layout aside{display:grid;grid-template-columns:1fr 1fr;gap:18px}.history{margin-top:0}}@media(max-width:650px){.resume-grid,.templates,.layout aside{grid-template-columns:1fr}.action{align-items:flex-start;gap:14px;flex-direction:column}}
+<template>
+  <AppLayout>
+    <header class="head">
+      <span>READY FOR YOUR NEXT OPPORTUNITY</span>
+      <h1>让好经历，成为好简历。</h1>
+      <p>选择内容与版式，确认预览后生成投递文件。</p>
+    </header>
+    <div v-if="loading" class="empty">正在加载简历…</div>
+    <div v-else-if="error" class="empty">
+      <p>{{ error }}</p>
+      <el-button @click="load">重新加载</el-button>
+    </div>
+    <div v-else class="export-layout">
+      <section class="export-options">
+        <div class="option-step">
+          <span>01</span>
+          <h2>选择简历内容</h2>
+        </div>
+        <div v-if="!resumes.length" class="empty">
+          还没有简历。<router-link to="/resumes">创建第一份母简历 →</router-link>
+        </div>
+        <el-select v-else v-model="resumeId" aria-label="选择导出简历" class="resume-select"
+          ><el-option
+            v-for="item in resumes"
+            :key="item.id"
+            :value="item.id"
+            :label="(item.source_resume_id ? '岗位版' : '母简历') + ' · ' + item.title"
+        /></el-select>
+        <div class="option-step">
+          <span>02</span>
+          <h2>选择你的版式</h2>
+        </div>
+        <div class="template-options">
+          <button
+            v-for="item in resumeTemplates"
+            :key="item.id"
+            :class="{ active: template === item.id }"
+            :aria-pressed="template === item.id"
+            @click="template = item.id"
+          >
+            <TemplateThumbnail :template="item.id" :content="selected?.content" /><b>{{
+              item.name
+            }}</b
+            ><small>{{ item.description }}</small
+            ><span>{{ template === item.id ? '✓ 已选择' : '选择版式' }}</span>
+          </button>
+        </div>
+        <div class="export-action">
+          <el-button type="primary" size="large" :disabled="!selected" @click="preview"
+            >检查并打印 / 保存 PDF ↗</el-button
+          >
+          <p>A4 纸张 · 三款版式 · 预览与打印使用相同排版</p>
+        </div>
+        <div class="history">
+          <h3>最近打印记录</h3>
+          <p v-if="!records.length">尚无记录</p>
+          <article v-for="item in records.slice(0, 5)" :key="item.id">
+            <span>PDF</span>
+            <div>
+              <b>{{ item.resume_title }}</b
+              ><small>{{ templateName(item.template) }} · {{ formatDate(item.created_at) }}</small>
+            </div>
+          </article>
+          <small>记录表示发起过打印，是否保存成功以浏览器结果为准。</small>
+        </div>
+      </section>
+      <aside class="live-preview">
+        <header>
+          <span>实时版式预览</span><small>A4 / {{ templateName(template) }}</small>
+        </header>
+        <div v-if="selected" class="preview-reading-bar">
+          <span>正文已放大 · A4 真实排版</span
+          ><el-button @click="readingVisible = true">100% 阅读 ↗</el-button>
+        </div>
+        <ResumePreview v-if="selected" :content="selected.content" :template="template" />
+        <div v-else class="preview-empty">
+          <b>你的下一份简历</b>
+          <p>创建内容后，在这里查看完整排版。</p>
+        </div>
+        <p>投递前确认联系方式，内容建议控制在 1–2 页。</p>
+      </aside>
+    </div>
+    <el-dialog v-model="readingVisible" title="简历内容 · 放大阅读" width="920px"
+      ><ResumePreview v-if="selected" :content="selected.content" :template="template"
+    /></el-dialog>
+  </AppLayout>
+</template>
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import AppLayout from '@/layouts/AppLayout.vue'
+import TemplateThumbnail from '@/components/resume/TemplateThumbnail.vue'
+import ResumePreview from '@/components/resume/ResumePreview.vue'
+import { resumeTemplates } from '@/utils/resume-templates'
+import { listResumes } from '@/api/resumes'
+import { listExports } from '@/api/exports'
+const router = useRouter(),
+  route = useRoute(),
+  resumes = ref([]),
+  records = ref([]),
+  resumeId = ref(null),
+  template = ref('classic'),
+  loading = ref(true),
+  error = ref('')
+const readingVisible = ref(false)
+if (resumeTemplates.some((item) => item.id === route.query.template))
+  template.value = route.query.template
+const selected = computed(() => resumes.value.find((item) => item.id === resumeId.value))
+async function load() {
+  loading.value = true
+  error.value = ''
+  try {
+    const [r, e] = await Promise.all([listResumes(), listExports()])
+    resumes.value = r.data.data.resumes
+    records.value = e.data.data.exports
+    resumeId.value =
+      resumes.value.find((item) => item.id === Number(route.query.resumeId))?.id ||
+      resumes.value[0]?.id ||
+      null
+  } catch (e) {
+    error.value = e.response?.data?.message || '加载失败，请稍后重试'
+  } finally {
+    loading.value = false
+  }
+}
+onMounted(load)
+const preview = () =>
+  router.push({
+    name: 'resume-print',
+    params: { id: resumeId.value },
+    query: { template: template.value },
+  })
+const templateName = (id) => resumeTemplates.find((item) => item.id === id)?.name || id
+const formatDate = (value) => new Date(value.replace(' ', 'T') + 'Z').toLocaleDateString('zh-CN')
+</script>
+<style scoped>
+.head {
+  margin: 5px 0 30px;
+}
+.head > span {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #797582;
+}
+.head h1 {
+  font-size: 31px;
+  letter-spacing: -0.8px;
+  font-weight: 750;
+  margin: 8px 0;
+}
+.head p {
+  color: #6e6877;
+  font-size: 13px;
+}
+.export-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.7fr) minmax(0, 1.3fr);
+  gap: 26px;
+  max-width: 1400px;
+}
+.export-options {
+  background: white;
+  border: 1px solid #dbd7e3;
+  border-radius: 20px;
+  padding: 26px;
+  align-self: start;
+}
+.option-step {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.option-step > span {
+  font-size: 13px;
+  color: #9c8eb8;
+}
+.option-step h2 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.resume-select {
+  width: 100%;
+  margin-bottom: 30px;
+}
+.template-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.template-options button {
+  padding: 7px;
+  border: 1px solid #dbd7e3;
+  border-radius: 10px;
+  background: #fbfafc;
+  text-align: left;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.template-options button.active {
+  outline: 2px solid #6d4aff;
+  outline-offset: -1px;
+  background: #faf7ff;
+}
+.template-options b {
+  font-size: 14px;
+  font-weight: 650;
+  margin-top: 4px;
+}
+.template-options small {
+  font-size: 13px;
+  color: #6e6976;
+  line-height: 1.6;
+}
+.template-options button > span {
+  font-size: 13px;
+  color: #6d4aff;
+  margin-top: auto;
+}
+.export-action {
+  padding: 24px 0;
+  border-bottom: 1px solid #ede8f2;
+}
+.export-action .el-button {
+  width: 100%;
+  font-size: 13px;
+}
+.export-action p {
+  font-size: 13px;
+  color: #797581;
+  text-align: center;
+  margin-top: 10px;
+}
+.live-preview {
+  padding: 18px;
+  background: #dfdaea;
+  border: 1px solid #ccc5dc;
+  border-radius: 13px;
+  align-self: start;
+}
+.preview-reading-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 15px;
+  font-size: 13px;
+  color: #7d7590;
+}
+.preview-reading-bar :deep(.el-button) {
+  font-size: 13px;
+  min-height: 32px;
+  background: transparent;
+  border-color: #afa4c8;
+  color: #4c3e6b;
+}
+.live-preview > header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #797084;
+  margin-bottom: 15px;
+}
+.live-preview small {
+  font-size: 13px;
+  color: #a198ad;
+}
+.live-preview > p {
+  text-align: center;
+  color: #a49aad;
+  font-size: 13px;
+  margin-top: 16px;
+}
+.history {
+  padding-top: 22px;
+}
+.history h3 {
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.history > p,
+.history > small {
+  font-size: 13px;
+  color: #a69caf;
+}
+.history article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+.history article > span {
+  font-size: 13px;
+  padding: 5px 6px;
+  color: #9b6e89;
+  background: #faf0f6;
+  border-radius: 5px;
+}
+.history article div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.history article b {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history article small {
+  font-size: 13px;
+  color: #797581;
+}
+.preview-empty {
+  min-height: 440px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b3aabc;
+  font-size: 13px;
+}
+.empty {
+  padding: 40px 16px;
+  color: #9b91a6;
+  font-size: 13px;
+}
+.empty .el-button {
+  margin-top: 14px;
+}
+@media (max-width: 1100px) {
+  .export-layout {
+    grid-template-columns: 1fr;
+  }
+  .live-preview {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+  }
+}
+@media (max-width: 500px) {
+  .export-options {
+    padding: 18px;
+  }
+  .template-options {
+    gap: 7px;
+  }
+  .template-options button {
+    padding: 6px;
+  }
+  .template-options small {
+    display: none;
+  }
+  .head h1 {
+    font-size: 26px;
+  }
+  .live-preview {
+    padding: 12px;
+  }
+}
 </style>

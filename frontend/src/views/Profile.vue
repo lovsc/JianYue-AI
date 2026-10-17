@@ -1,4 +1,354 @@
-<template><AppLayout><header class="page-head"><div><span>ACCOUNT SETTINGS</span><h1>个人中心</h1><p>管理账号资料与登录安全。</p></div></header><div class="profile-grid"><aside><section class="identity"><div class="avatar">{{ initial }}</div><h2>{{ auth.user?.display_name||auth.user?.username }}</h2><p>@{{ auth.user?.username }}</p><span>加入于 {{ joinDate }}</span></section><nav><button :class="{active:tab==='profile'}" @click="tab='profile'">个人资料</button><button :class="{active:tab==='security'}" @click="tab='security'">账号安全</button></nav></aside><main><section v-if="tab==='profile'" class="card"><header><div><h2>个人资料</h2><p>这些信息用于完善你的求职工作台。</p></div></header><div class="form-grid"><label>登录用户名<el-input :model-value="auth.user?.username" disabled/></label><label>显示名称<el-input v-model="profile.displayName" maxlength="40" placeholder="你的姓名或称呼"/></label><label>邮箱地址<el-input v-model="profile.email" maxlength="120" placeholder="name@example.com"/></label><label>所在城市<el-input v-model="profile.location" maxlength="80" placeholder="例如：上海"/></label><label class="full">个人介绍 <span>{{ profile.bio.length }}/300</span><el-input v-model="profile.bio" type="textarea" :rows="5" maxlength="300" placeholder="简单介绍你的职业方向和优势"/></label></div><footer><el-button type="primary" :loading="saving" @click="saveProfile">保存资料</el-button></footer></section><section v-else class="card"><header><div><h2>修改密码</h2><p>定期更新密码有助于保护简历与求职数据。</p></div><span class="secure">安全连接</span></header><div class="password-form"><label>当前密码<el-input v-model="password.currentPassword" type="password" show-password/></label><label>新密码<el-input v-model="password.newPassword" type="password" show-password placeholder="至少 8 位，包含字母和数字"/></label><label>确认新密码<el-input v-model="password.confirmPassword" type="password" show-password/></label><div class="rules"><b>密码要求</b><span :class="{ok:password.newPassword.length>=8}">至少 8 个字符</span><span :class="{ok:/[A-Za-z]/.test(password.newPassword)&&/\d/.test(password.newPassword)}">同时包含字母和数字</span></div></div><footer><el-button type="primary" :loading="changing" @click="submitPassword">更新密码</el-button></footer></section></main></div></AppLayout></template>
-<script setup>import{computed,reactive,ref}from'vue';import{useRouter}from'vue-router';import{ElMessage}from'element-plus';import AppLayout from'@/layouts/AppLayout.vue';import{useAuthStore}from'@/stores/auth';import{changePassword,updateProfile}from'@/api/auth';const auth=useAuthStore(),router=useRouter(),tab=ref('profile'),saving=ref(false),changing=ref(false);const profile=reactive({displayName:auth.user?.display_name||'',email:auth.user?.email||'',location:auth.user?.location||'',bio:auth.user?.bio||''});const password=reactive({currentPassword:'',newPassword:'',confirmPassword:''});const initial=computed(()=>(auth.user?.display_name||auth.user?.username||'U').slice(0,1).toUpperCase());const joinDate=computed(()=>auth.user?.created_at?new Date(auth.user.created_at.replace(' ','T')+'Z').toLocaleDateString('zh-CN'):'');const saveProfile=async()=>{saving.value=true;try{const user=(await updateProfile(profile)).data.data.user;auth.setUser(user);ElMessage.success('个人资料已保存')}catch(e){ElMessage.error(e.response?.data?.message||'保存失败')}finally{saving.value=false}};const submitPassword=async()=>{if(password.newPassword!==password.confirmPassword){ElMessage.warning('两次输入的新密码不一致');return}changing.value=true;try{await changePassword(password);ElMessage.success('密码已修改，请重新登录');auth.logout();router.replace('/')}catch(e){ElMessage.error(e.response?.data?.message||'密码修改失败')}finally{changing.value=false}}</script>
-<style scoped>.page-head{margin-bottom:26px}.page-head span{color:#6d4aff;font-size:11px;font-weight:800;letter-spacing:2px}.page-head h1{margin:5px 0;font-size:31px;font-weight:760}.page-head p{color:#7e8491}.profile-grid{display:grid;grid-template-columns:260px minmax(0,760px);gap:22px;align-items:start}.profile-grid>aside,.card{background:#fff;border:1px solid #e5e7ed;border-radius:20px;box-shadow:0 8px 28px #252c4010}.identity{padding:28px 20px;text-align:center}.avatar{display:grid;place-items:center;width:76px;height:76px;margin:0 auto 14px;border-radius:22px;background:linear-gradient(135deg,#6d4aff,#8f75ff);color:#fff;font-size:28px;font-weight:800;box-shadow:0 12px 24px #6d4aff33}.identity h2{font-size:19px;font-weight:720}.identity p,.identity span{color:#9096a3}.identity span{display:block;margin-top:12px;font-size:11px}.profile-grid aside nav{display:grid;padding:8px;border-top:1px solid #eceef2}.profile-grid aside nav button{padding:12px;border:0;border-radius:10px;background:#fff;text-align:left;cursor:pointer}.profile-grid aside nav button.active{background:#f0edff;color:#6d4aff;font-weight:650}.card{overflow:hidden}.card>header{display:flex;justify-content:space-between;align-items:center;padding:24px 27px;border-bottom:1px solid #eceef2}.card h2{font-size:20px;font-weight:720}.card header p{color:#8b919d}.secure{padding:5px 10px;border-radius:10px;background:#e9f8ef;color:#278052;font-size:11px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:19px;padding:27px}.form-grid label,.password-form label{display:grid;gap:7px;font-size:13px;font-weight:650}.form-grid .full{grid-column:1/-1}.form-grid label span{float:right;color:#9da2ad;font-weight:400}.card>footer{display:flex;justify-content:flex-end;padding:18px 27px;background:#fafafe;border-top:1px solid #eceef2}.password-form{display:grid;gap:18px;padding:27px;max-width:520px}.rules{display:grid;gap:6px;padding:15px;border-radius:11px;background:#f6f7f9;color:#999}.rules b{color:#555;font-weight:650}.rules span::before{content:'○';margin-right:7px}.rules span.ok{color:#278052}.rules span.ok::before{content:'✓'}@media(max-width:850px){.profile-grid{grid-template-columns:1fr}.profile-grid>aside{display:grid;grid-template-columns:200px 1fr}.profile-grid aside nav{border-top:0;border-left:1px solid #eee}}@media(max-width:600px){.form-grid{grid-template-columns:1fr}.profile-grid>aside{display:block}}
+<template>
+  <AppLayout
+    ><header class="page-head">
+      <div>
+        <span>ACCOUNT SETTINGS</span>
+        <h1>个人中心</h1>
+        <p>管理账号资料与登录安全。</p>
+      </div>
+      <el-button @click="logout">退出登录</el-button>
+    </header>
+    <div class="profile-grid">
+      <aside>
+        <section class="identity">
+          <div class="avatar">{{ initial }}</div>
+          <h2>{{ auth.user?.display_name || auth.user?.username }}</h2>
+          <p>@{{ auth.user?.username }}</p>
+          <span>加入于 {{ joinDate }}</span>
+        </section>
+        <nav>
+          <button :class="{ active: tab === 'profile' }" @click="tab = 'profile'">个人资料</button
+          ><button :class="{ active: tab === 'security' }" @click="tab = 'security'">
+            账号安全
+          </button>
+        </nav>
+      </aside>
+      <main>
+        <section v-if="tab === 'profile'" class="card">
+          <header>
+            <div>
+              <h2>个人资料</h2>
+              <p>这些信息用于完善你的求职工作台。</p>
+            </div>
+          </header>
+          <div class="form-grid">
+            <label>登录用户名<el-input :model-value="auth.user?.username" disabled /></label
+            ><label
+              >显示名称<el-input
+                v-model="profile.displayName"
+                maxlength="40"
+                placeholder="你的姓名或称呼" /></label
+            ><label
+              >邮箱地址<el-input
+                v-model="profile.email"
+                maxlength="120"
+                placeholder="name@example.com" /></label
+            ><label
+              >所在城市<el-input
+                v-model="profile.location"
+                maxlength="80"
+                placeholder="例如：上海" /></label
+            ><label class="full"
+              >个人介绍 <span>{{ profile.bio.length }}/300</span
+              ><el-input
+                v-model="profile.bio"
+                type="textarea"
+                :rows="5"
+                maxlength="300"
+                placeholder="简单介绍你的职业方向和优势"
+            /></label>
+          </div>
+          <footer>
+            <el-button type="primary" :loading="saving" @click="saveProfile">保存资料</el-button>
+          </footer>
+        </section>
+        <section v-else class="card">
+          <header>
+            <div>
+              <h2>修改密码</h2>
+              <p>定期更新密码有助于保护简历与求职数据。</p>
+            </div>
+            <span class="secure">安全连接</span>
+          </header>
+          <div class="password-form">
+            <label
+              >当前密码<el-input
+                v-model="password.currentPassword"
+                type="password"
+                show-password /></label
+            ><label
+              >新密码<el-input
+                v-model="password.newPassword"
+                type="password"
+                show-password
+                placeholder="至少 8 位，包含字母和数字" /></label
+            ><label
+              >确认新密码<el-input v-model="password.confirmPassword" type="password" show-password
+            /></label>
+            <div class="rules">
+              <b>密码要求</b
+              ><span :class="{ ok: password.newPassword.length >= 8 }">至少 8 个字符</span
+              ><span
+                :class="{
+                  ok: /[A-Za-z]/.test(password.newPassword) && /\d/.test(password.newPassword),
+                }"
+                >同时包含字母和数字</span
+              >
+            </div>
+          </div>
+          <footer>
+            <el-button type="primary" :loading="changing" @click="submitPassword"
+              >更新密码</el-button
+            >
+          </footer>
+        </section>
+      </main>
+    </div></AppLayout
+  >
+</template>
+<script setup>
+import { computed, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAuthStore } from '@/stores/auth'
+import { changePassword, updateProfile } from '@/api/auth'
+const auth = useAuthStore(),
+  router = useRouter(),
+  tab = ref('profile'),
+  saving = ref(false),
+  changing = ref(false)
+const logout = () => {
+  auth.logout()
+  router.replace('/')
+}
+const profile = reactive({
+  displayName: auth.user?.display_name || '',
+  email: auth.user?.email || '',
+  location: auth.user?.location || '',
+  bio: auth.user?.bio || '',
+})
+const password = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' })
+const initial = computed(() =>
+  (auth.user?.display_name || auth.user?.username || 'U').slice(0, 1).toUpperCase(),
+)
+const joinDate = computed(() =>
+  auth.user?.created_at
+    ? new Date(auth.user.created_at.replace(' ', 'T') + 'Z').toLocaleDateString('zh-CN')
+    : '',
+)
+const saveProfile = async () => {
+  saving.value = true
+  try {
+    const user = (await updateProfile(profile)).data.data.user
+    auth.setUser(user)
+    ElMessage.success('个人资料已保存')
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '保存失败')
+  } finally {
+    saving.value = false
+  }
+}
+const submitPassword = async () => {
+  if (password.newPassword !== password.confirmPassword) {
+    ElMessage.warning('两次输入的新密码不一致')
+    return
+  }
+  changing.value = true
+  try {
+    await changePassword(password)
+    ElMessage.success('密码已修改，请重新登录')
+    auth.logout()
+    router.replace('/')
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '密码修改失败')
+  } finally {
+    changing.value = false
+  }
+}
+</script>
+<style scoped>
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.page-head span {
+  color: #6d4aff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.page-head h1 {
+  margin: 5px 0;
+  font-size: 31px;
+  font-weight: 760;
+}
+.page-head p {
+  color: #7e8491;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 760px);
+  gap: 22px;
+  align-items: start;
+}
+.profile-grid > aside,
+.card {
+  background: #fff;
+  border: 1px solid #e5e7ed;
+  border-radius: 20px;
+  box-shadow: 0 8px 28px #252c4010;
+}
+.identity {
+  padding: 28px 20px;
+  text-align: center;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 14px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #6d4aff, #614d81);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 12px 24px #6d4aff33;
+}
+.identity h2 {
+  font-size: 19px;
+  font-weight: 720;
+}
+.identity p,
+.identity span {
+  color: #9096a3;
+}
+.identity span {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.profile-grid aside nav {
+  display: grid;
+  padding: 8px;
+  border-top: 1px solid #eceef2;
+}
+.profile-grid aside nav button {
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.profile-grid aside nav button.active {
+  background: #eae7f1;
+  color: #6d4aff;
+  font-weight: 650;
+}
+.card {
+  overflow: hidden;
+}
+.card > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 27px;
+  border-bottom: 1px solid #eceef2;
+}
+.card h2 {
+  font-size: 20px;
+  font-weight: 720;
+}
+.card header p {
+  color: #8b919d;
+}
+.secure {
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: #efe9f8;
+  color: #482780;
+  font-size: 13px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 19px;
+  padding: 27px;
+}
+.form-grid label,
+.password-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.form-grid .full {
+  grid-column: 1/-1;
+}
+.form-grid label span {
+  float: right;
+  color: #9da2ad;
+  font-weight: 400;
+}
+.card > footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 27px;
+  background: #f4f2f8;
+  border-top: 1px solid #eceef2;
+}
+.password-form {
+  display: grid;
+  gap: 18px;
+  padding: 27px;
+  max-width: 520px;
+}
+.rules {
+  display: grid;
+  gap: 6px;
+  padding: 15px;
+  border-radius: 11px;
+  background: #f6f7f9;
+  color: #999;
+}
+.rules b {
+  color: #555;
+  font-weight: 650;
+}
+.rules span::before {
+  content: '○';
+  margin-right: 7px;
+}
+.rules span.ok {
+  color: #482780;
+}
+.rules span.ok::before {
+  content: '✓';
+}
+@media (max-width: 850px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-grid > aside {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+  }
+  .profile-grid aside nav {
+    border-top: 0;
+    border-left: 1px solid #eee;
+  }
+}
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-grid > aside {
+    display: block;
+  }
+}
 </style>

@@ -136,7 +136,7 @@ const pendingDeleteId = ref(null)
 const prompts = [
   '根据我的简历，帮我准备 5 个面试问题',
   '如何量化描述项目成果？',
-  '帮我制定前端岗位的学习计划',
+  '第一次找工作，应该怎样准备简历和面试？',
 ]
 let controller = null
 
@@ -162,12 +162,16 @@ const scrollBottom = async () => {
 }
 const openSession = async (id) => {
   if (loading.value) return
-  const data = (await getSession(id)).data.data
-  currentId.value = id
-  currentSession.value = data.session
-  selectedResume.value = data.session.resume_id
-  messages.value = data.messages
-  scrollBottom()
+  try {
+    const data = (await getSession(id)).data.data
+    currentId.value = id
+    currentSession.value = data.session
+    selectedResume.value = data.session.resume_id
+    messages.value = data.messages
+    scrollBottom()
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '对话加载失败')
+  }
 }
 const newChat = () => {
   if (loading.value) return
@@ -206,11 +210,13 @@ const stopGeneration = () => controller?.abort()
 const send = async () => {
   const content = input.value.trim()
   if (!content || loading.value) return
+  loading.value = true
   let id
   try {
     id = await ensureSession()
   } catch (e) {
     ElMessage.error(e.response?.data?.message || '创建对话失败')
+    loading.value = false
     return
   }
   messages.value.push({ localId: Date.now(), role: 'user', content })
@@ -249,10 +255,15 @@ const send = async () => {
         if (!line.trim().startsWith('data:')) continue
         const raw = line.replace(/^data:\s*/, '').trim()
         if (raw === '[DONE]') continue
+        let event
         try {
-          assistant.content += JSON.parse(raw).choices?.[0]?.delta?.content || ''
-          scrollBottom()
-        } catch {}
+          event = JSON.parse(raw)
+        } catch {
+          continue
+        }
+        if (event.error) throw new Error(event.error)
+        assistant.content += event.choices?.[0]?.delta?.content || ''
+        scrollBottom()
       }
     }
     await loadSessions()
@@ -260,7 +271,8 @@ const send = async () => {
   } catch (e) {
     if (e.name === 'AbortError') {
       if (!assistant.content) assistant.content = '已停止生成。'
-    } else assistant.content = `请求失败：${e.message}`
+    } else
+      assistant.content = [assistant.content, `请求失败：${e.message}`].filter(Boolean).join('\n\n')
   } finally {
     assistant.pending = false
     loading.value = false
@@ -302,7 +314,7 @@ const time = (value) =>
 }
 .sessions header span {
   color: #6d4aff;
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 1.5px;
 }
@@ -315,7 +327,7 @@ const time = (value) =>
   height: 34px;
   border: 0;
   border-radius: 10px;
-  background: #171923;
+  background: #171c2c;
   color: #fff;
   font-size: 20px;
   cursor: pointer;
@@ -331,7 +343,7 @@ const time = (value) =>
 .context p {
   margin-top: 5px;
   color: #a0a5ae;
-  font-size: 10px;
+  font-size: 13px;
 }
 .session-list {
   min-height: 0;
@@ -342,7 +354,7 @@ const time = (value) =>
 .session-list > p {
   padding: 0 8px 7px;
   color: #9297a3;
-  font-size: 11px;
+  font-size: 13px;
 }
 .session-list > button {
   width: 100%;
@@ -416,7 +428,7 @@ const time = (value) =>
 }
 .conversation header span {
   color: #8d93a0;
-  font-size: 12px;
+  font-size: 13px;
 }
 .conversation header > i {
   width: 9px;
@@ -425,8 +437,8 @@ const time = (value) =>
   background: #bbb;
 }
 .conversation header > i.online {
-  background: #37b276;
-  box-shadow: 0 0 0 4px #e6f8ef;
+  background: #6537b2;
+  box-shadow: 0 0 0 4px #ede6f8;
 }
 .messages {
   min-height: 0;
@@ -498,9 +510,9 @@ const time = (value) =>
   height: 34px;
   flex: none;
   border-radius: 10px;
-  background: #171923;
+  background: #171c2c;
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 750;
 }
 .message-list article > div {
@@ -617,7 +629,7 @@ const time = (value) =>
   text-align: center;
   margin-top: 6px;
   color: #a0a5ae;
-  font-size: 10px;
+  font-size: 13px;
 }
 @media (max-width: 900px) {
   .chat-shell {
@@ -644,17 +656,12 @@ const time = (value) =>
     padding: 10px 13px;
   }
 }
-/* Viewport-locked chat layout: the composer never leaves the visible workspace. */
+/* Keep messages scrollable inside the workspace without covering its header or footer. */
 .chat-shell {
-  position: fixed;
-  z-index: 5;
-  top: 34px;
-  right: 42px;
-  bottom: 34px;
-  left: 272px;
-  width: auto;
-  height: auto;
-  max-height: none;
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - 130px);
+  min-height: 460px;
 }
 
 .conversation {
@@ -679,10 +686,7 @@ const time = (value) =>
 
 @media (max-width: 760px) {
   .chat-shell {
-    top: 24px;
-    right: 16px;
-    bottom: 24px;
-    left: 92px;
+    height: calc(100dvh - 155px);
   }
 }
 .session-item {
@@ -750,12 +754,12 @@ const time = (value) =>
   flex: 1;
   padding-left: 6px;
   color: #555b68;
-  font-size: 12px;
+  font-size: 13px;
 }
 .cancel-delete,
 .confirm-delete {
   padding: 6px 7px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .cancel-delete {
   color: #747b88;

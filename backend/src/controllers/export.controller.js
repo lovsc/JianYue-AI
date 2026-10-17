@@ -8,7 +8,7 @@ function create(req, res) {
   const resumeId = Number(req.body?.resumeId)
   const template = String(req.body?.template || '')
   resumeService.get(resumeId, req.user.id)
-  if (!['classic', 'modern'].includes(template)) throw new AppError(400, '导出模板不存在', 'INVALID_TEMPLATE')
+  if (!['classic', 'modern', 'elegant'].includes(template)) throw new AppError(400, '导出模板不存在', 'INVALID_TEMPLATE')
   success(res, { export: exportsRepository.create(req.user.id, resumeId, template) }, '导出记录已创建', 201)
 }
 

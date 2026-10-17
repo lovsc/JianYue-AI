@@ -4,9 +4,13 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, _from, savedPosition) {
+    if (to.hash) return { el: to.hash, top: 90, behavior: 'smooth' }
+    return savedPosition || { top: 0 }
+  },
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
       component: Login,
       meta: { guestOnly: true },
@@ -14,9 +18,10 @@ const router = createRouter({
 
     {
       path: '/home',
+      alias: '/',
       name: 'home',
       component: () => import('@/views/Landing.vue'),
-      meta: { requiresAuth: true },
+      meta: {},
     },
     {
       path: '/dashboard',
@@ -76,9 +81,13 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+let sessionCheck
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
-  if (to.meta.requiresAuth && !auth.isAuthenticated) return { name: 'login' }
+  if (auth.token && !sessionCheck) sessionCheck = auth.restoreSession()
+  if (sessionCheck) await sessionCheck
+  if (to.meta.requiresAuth && !auth.isAuthenticated)
+    return { name: 'login', query: { redirect: to.fullPath } }
   if (to.meta.guestOnly && auth.isAuthenticated) return { name: 'home' }
   return true
 })

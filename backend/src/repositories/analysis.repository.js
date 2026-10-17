@@ -16,7 +16,9 @@ function findByIdAndUser(id, userId) {
 function listByUser(userId) {
   return db.prepare(`
     SELECT a.id, a.resume_id, a.job_description_id, a.status, a.duration_ms, a.created_at,
-           r.title AS resume_title, j.position, j.company,
+           COALESCE(json_extract(a.result_json, '$.sourceSnapshot.title'), r.title) AS resume_title,
+           COALESCE(json_extract(a.result_json, '$.sourceSnapshot.job.position'), j.position) AS position,
+           COALESCE(json_extract(a.result_json, '$.sourceSnapshot.job.company'), j.company) AS company,
            json_extract(a.result_json, '$.score') AS score
     FROM resume_analyses a
     JOIN resumes r ON r.id = a.resume_id

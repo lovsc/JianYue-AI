@@ -15,7 +15,7 @@
 - 重启：`systemctl restart jianyue-ai`；状态：`systemctl status jianyue-ai --no-pager`。
 - 数据：`/www/jianyue-data/resume.db`，应用更新时保留该目录。
 - 主域名代理：`/www/server/panel/vhost/nginx/octopush5.com.conf`，原 SSL 和 ACME 验证配置保留。
-- 备案展示：构建时设置公开环境变量 `VITE_ICP_RECORD`，沿用原站点的备案号；普通构建留空时不展示。
+- 备案展示：构建时可通过公开环境变量 `VITE_ICP_RECORD` 指定备案号；未配置时默认显示 `黔ICP备2025053618号-1`。正式发布工作流使用同一完整备案号，并链接工信部查询页。
 
 通过公网 HTTPS 验证了注册、登录、简历创建与保存、真实 AI SSE 聊天、真实岗位分析、导出准备接口以及重启后数据保留。部署测试账号会清理；实际浏览器 PDF 分页与此前审查的问题仍需后续专项验收。
 

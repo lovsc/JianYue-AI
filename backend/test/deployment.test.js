@@ -81,12 +81,13 @@ test('production deployment through one HTTP service', async (t) => {
   await t.test('register, authenticated save and SQLite persistence', async () => {
     const registered = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ username: 'deploy_check', password: 'DeployCheck123' }) })
     assert.equal(registered.status, 201)
-    token = (await registered.json()).data.token
+    assert.equal((await registered.json()).data.token, undefined)
+    token = (await (await request('/api/v1/auth/login', { method: 'POST', body: JSON.stringify({ username: 'deploy_check', password: 'DeployCheck123' }) })).json()).data.token
     assert.equal((await request('/api/v1/resumes')).status, 401)
     const created = await request('/api/v1/resumes', { method: 'POST', token, body: JSON.stringify({ title: 'deployment test' }) })
     assert.equal(created.status, 201)
     resumeId = (await created.json()).data.resume.id
-    const changed = await request(`/api/v1/resumes/${resumeId}`, { method: 'PATCH', token, body: JSON.stringify({ title: 'saved after deployment' }) })
+    const changed = await request(`/api/v1/resumes/${resumeId}`, { method: 'PATCH', token, body: JSON.stringify({ title: 'saved after deployment', expectedRevision: 1 }) })
     assert.equal(changed.status, 200)
     assert.equal((await (await request(`/api/v1/resumes/${resumeId}`, { token })).json()).data.resume.title, 'saved after deployment')
     await db.backup(path.join(temp, 'snapshot.db'))
@@ -102,7 +103,8 @@ test('production deployment through one HTTP service', async (t) => {
     assert.equal(limited.status, 429)
     assert.equal((await limited.json()).code, 'AI_RATE_LIMITED')
     const account = await request('/api/v1/auth/register', { method: 'POST', body: JSON.stringify({ username: 'deploy_other', password: 'DeployCheck123' }) })
-    const otherToken = (await account.json()).data.token
+    assert.equal(account.status, 201)
+    const otherToken = (await (await request('/api/v1/auth/login', { method: 'POST', body: JSON.stringify({ username: 'deploy_other', password: 'DeployCheck123' }) })).json()).data.token
     assert.equal((await request('/api/v1/chat/stream', { method: 'POST', token: otherToken, body: '{}' })).status, 400)
   })
 

@@ -4,6 +4,7 @@ const chats = require('../repositories/chat.repository')
 const resumeService = require('../services/resume.service')
 const { AppError } = require('../utils/app-error')
 const { success } = require('../utils/response')
+const { StringDecoder } = require('node:string_decoder')
 
 const list=(req,res)=>success(res,{sessions:sessions.list(req.user.id)},'获取对话列表成功')
 const get=(req,res)=>success(res,sessions.get(Number(req.params.id),req.user.id),'获取对话成功')
@@ -18,7 +19,7 @@ async function send(req,res){
   chats.addMessage(id,'user',content)
   const history=chats.listMessages(id,30).map(({role,content:text})=>({role,content:text}))
   const messages=[]
-  if(session.resume_id){const resume=resumeService.get(session.resume_id,req.user.id);messages.push({role:'system',content:`你是求职与简历顾问。以下是用户主动选择的简历上下文。回答时只能基于真实内容，不得虚构经历：${JSON.stringify(resume.content)}`})}
+  if(session.resume_id){const resume=resumeService.get(session.resume_id,req.user.id);const {photo:_photo,...basics}=resume.content.basics||{};messages.push({role:'system',content:`你是求职与简历顾问。以下是用户主动选择的简历上下文。回答时只能基于真实内容，不得虚构经历：${JSON.stringify({...resume.content,basics})}`})}
   messages.push(...history)
   if(session.title==='新对话')chats.updateTitle(id,req.user.id,content.slice(0,28))
   res.setHeader('Content-Type','text/event-stream; charset=utf-8')
@@ -35,23 +36,24 @@ async function send(req,res){
     response=await chatService.createChatStream(messages)
   }catch(error){
     clearInterval(heartbeat)
-    console.error('Chat upstream failed:',error.response?.status||error.message)
+    console.error('Chat upstream failed', { status: error.response?.status || null })
     res.write(`data: ${JSON.stringify({error:'AI 服务响应失败，请稍后重试'})}\n\n`)
     return res.end()
   }
 
   let assistant='',buffer='',finished=false
-  const finish=()=>{if(finished)return;finished=true;clearInterval(heartbeat);if(assistant.trim())chats.addMessage(id,'assistant',assistant);if(!res.writableEnded)res.end()}
+  const decoder = new StringDecoder('utf8')
+  const finish=()=>{if(finished)return;finished=true;clearInterval(heartbeat);if(assistant.trim()&&chats.findSession(id,req.user.id))chats.addMessage(id,'assistant',assistant);if(!res.writableEnded)res.end()}
   response.data.on('data',chunk=>{
-    const text=chunk.toString()
+    const text=decoder.write(chunk)
     if(!res.writableEnded)res.write(text)
     buffer+=text
     const lines=buffer.split('\n');buffer=lines.pop()||''
     for(const line of lines){if(!line.trim().startsWith('data:'))continue;const json=line.replace(/^data:\s*/,'').trim();if(json==='[DONE]')continue;try{assistant+=JSON.parse(json).choices?.[0]?.delta?.content||''}catch{}}
   })
   response.data.on('end',finish)
-  response.data.on('error',finish)
-  res.on('close',()=>{clearInterval(heartbeat);if(!finished&&!response.data.destroyed)response.data.destroy()})
+  response.data.on('error',()=>{if(!res.writableEnded)res.write(`data: ${JSON.stringify({error:'响应中断，请重试；已接收的内容会保留'})}\n\n`);finish()})
+  res.on('close',()=>{clearInterval(heartbeat);if(!finished&&!response.data.destroyed)response.data.destroy();finish()})
 }
 
 module.exports={list,get,create,remove,send}

@@ -145,6 +145,11 @@ function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id
       ON chat_messages(session_id, id ASC);
   `)
+
+  const resumeColumns = db.prepare('PRAGMA table_info(resumes)').all().map(column => column.name)
+  if (!resumeColumns.includes('revision')) db.exec('ALTER TABLE resumes ADD COLUMN revision INTEGER NOT NULL DEFAULT 1')
+  if (!resumeColumns.includes('source_resume_id')) db.exec('ALTER TABLE resumes ADD COLUMN source_resume_id INTEGER REFERENCES resumes(id) ON DELETE SET NULL')
+  if (!resumeColumns.includes('target_job_id')) db.exec('ALTER TABLE resumes ADD COLUMN target_job_id INTEGER REFERENCES job_descriptions(id) ON DELETE SET NULL')
 }
 
 module.exports = { db, initializeDatabase }

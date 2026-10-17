@@ -35,13 +35,13 @@ jobs:
           npm ci --prefix backend --no-audit --no-fund
       - name: 验证后端及发布回滚逻辑
         run: |
-          npm run test:deployment --prefix backend
+          npm test --prefix backend
           python3 -m unittest discover -s deploy/tests -v
       - name: 构建发布包
         id: package
         env:
           RELEASE_SHA: ${{ github.sha }}
-          VITE_ICP_RECORD: 黔ICP备2025053618号
+          VITE_ICP_RECORD: 黔ICP备2025053618号-1
         run: node scripts/package-release.mjs
       - name: 上传并发布（服务器自动备份及失败回滚）
         env:

@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-export const apiBase = import.meta.env.VITE_API_BASE_URL ||
+export const apiBase =
+  import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD ? '/api/v1' : 'http://localhost:3000/api/v1')
 
 const http = axios.create({
@@ -23,7 +24,10 @@ http.interceptors.response.use(
       localStorage.removeItem('current_user')
       if (hadToken) {
         window.dispatchEvent(new CustomEvent('auth:unauthorized'))
-        if (window.location.pathname !== '/') window.location.replace('/')
+        if (window.location.pathname !== '/login')
+          window.location.replace(
+            `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+          )
       }
     }
     return Promise.reject(error)

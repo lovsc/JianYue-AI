@@ -30,6 +30,19 @@ npm run dev
 
 完整的业务、架构、接口和故障排查说明请阅读 [项目开发与交接文档](docs/PROJECT_DEVELOPMENT.md)。
 
+## 当前产品流程与验证
+
+访问 `/` 可先浏览功能与三款模板；使用服务时登录，注册成功后回到登录表单。岗位分析默认创建独立岗位版本，采纳建议前对比原文、自动保存快照；编辑冲突会暂停自动保存并允许备份草稿。
+
+界面延续紫色、深蓝与灰白配色，保留原登录注册界面。首页与工作区字号已增大；三款简历正文为 11.5pt，支持放大阅读，预览与打印共用排版。网页底部展示备案信息并链接工信部查询页，浏览器图标使用简跃品牌标识。
+
+```bash
+npm test --prefix backend
+npm run build --prefix frontend
+```
+
+完整浏览器流程使用 `node scripts/verify-product-ui.cjs`，需要提供 Playwright（可通过 `PLAYWRIGHT_MODULE` 指定安装路径）及浏览器（可通过 `CHROME_PATH` 指定）。脚本自行启动服务，使用独立测试数据库与 AI 桩，截图和三款打印 PDF 存放在 `tmp/product-ui/`。
+
 ## 服务器部署
 
 阿里云与宝塔部署说明见 [部署文档](docs/DEPLOYMENT_BAOTA.md)。本地执行 `node scripts/package-release.mjs` 可构建不含密钥、用户数据库和本机依赖的发布包，输出到 D 盘项目的 `tmp/releases/`。

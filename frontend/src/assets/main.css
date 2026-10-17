@@ -1,4 +1,107 @@
+:root {
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Microsoft YaHei',
+    sans-serif;
+  color: #242336;
+  background: #f7f7fb;
+  font-size: 14px;
+  line-height: 1.65;
+  --el-color-primary: #6d4aff;
+  --el-border-radius-base: 8px;
+  --el-font-size-base: 14px;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+textarea {
+  touch-action: manipulation;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #a995ff;
+  outline-offset: 4px;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
 #app {
   width: 100%;
-  height: 100vh;
+  min-height: 100dvh;
+}
+a {
+  color: inherit;
+}
+img {
+  max-width: 100%;
+}
+.el-dialog {
+  max-width: calc(100vw - 28px);
+}
+.el-drawer {
+  max-width: 100vw;
+}
+.el-message {
+  max-width: calc(100vw - 28px);
+}
+.el-button + .el-button {
+  margin-left: 8px;
+}
+p {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .editor-head {
+    flex-wrap: wrap !important;
+  }
+  .editor-head > div {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    width: 100%;
+  }
+  .saved-time {
+    display: none;
+  }
+  .page-head p,
+  .head p {
+    font-size: 13px;
+  }
+  .el-message {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
 }
